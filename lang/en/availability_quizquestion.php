@@ -26,6 +26,14 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['description'] = 'This plugin allows you to limit access to another Moodle activity base just on the outcome of a single question in a quiz.';
+$string['error_selectquiz'] = 'You must select a quiz.';
+$string['error_selectquestion'] = 'You must select a question.';
+$string['error_selectstate'] = 'You must select a state.';
+$string['gradedpartial'] = 'Partially correct';
+$string['gradedright'] = 'Correct';
+$string['gradedwrong'] = 'Incorrect';
+$string['label_state'] = 'Required state';
+$string['label_question'] = 'Which question in the selected quiz';
 $string['pluginname'] = 'Restriction by single quiz question';
 $string['privacy:metadata'] = 'The Restriction by single quiz question plugin does not store any personal data.';
 $string['title'] = 'Quiz question';

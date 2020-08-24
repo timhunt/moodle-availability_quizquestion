@@ -30,50 +30,57 @@ defined('MOODLE_INTERNAL') || die();
  * Restriction by single quiz question front-end class.
  */
 class frontend extends \core_availability\frontend {
-    /** @var array Array of grouping info for course */
-    protected $allgroupings;
-    /** @var int Course id that $allgroupings is for */
-    protected $allgroupingscourseid;
+    /** @var array Array of quiz info for course */
+    protected $allquizzes;
+    /** @var int Course id that $allquizzes is for */
+    protected $allquizzescourseid;
+
+    protected function get_javascript_strings() {
+        return ['label_state', 'label_question'];
+    }
 
     protected function get_javascript_init_params($course, \cm_info $cm = null,
             \section_info $section = null) {
-        // Get all groups for course.
-        $groupings = $this->get_all_groupings($course->id);
+        // Get all quizzes for course.
+        $quizzes = $this->get_all_quizzes($course->id);
 
-        // Change to JS array format and return.
-        $jsarray = array();
         $context = \context_course::instance($course->id);
-        foreach ($groupings as $rec) {
-            $jsarray[] = (object)array('id' => $rec->id, 'name' =>
-                    format_string($rec->name, true, array('context' => $context)));
-        }
-        return array($jsarray);
+
+        array_walk($quizzes, function($quiz) use ($context) {
+            $quiz->name = format_string($quiz->name, true, ['context' => $context]);
+        });
+
+        $states = [
+            'gradedright' => get_string('correct', 'quiz'),
+            'gradedpartial' => get_string('partiallycorrect', 'quiz'),
+            'gradedwrong' => get_string('incorrect', 'quiz'),
+        ];
+
+        return [
+            array_values($quizzes),
+            self::convert_associative_array_for_js($states, 'shortname', 'displayname'),
+        ];
     }
 
     /**
-     * Gets all the groupings on the course.
+     * Gets all the quizzes on the course.
      *
      * @param int $courseid Course id
-     * @return array Array of grouping objects
+     * @return array Array of quiz objects
      */
-    protected function get_all_groupings($courseid) {
+    protected function get_all_quizzes($courseid) {
         global $DB;
-        if ($courseid != $this->allgroupingscourseid) {
-            $this->allgroupings = $DB->get_records('groupings',
-                    array('courseid' => $courseid), 'id, name');
-            $this->allgroupingscourseid = $courseid;
+        if ($courseid != $this->allquizzescourseid) {
+            $this->allquizzes = $DB->get_records('quiz', ['course' => $courseid], 'name', 'id, name');
+            $this->allquizzescourseid = $courseid;
         }
-        return $this->allgroupings;
+        return $this->allquizzes;
     }
 
     protected function allow_add($course, \cm_info $cm = null,
             \section_info $section = null) {
-        global $CFG, $DB;
 
-        // Check if groupings are in use for the course. (Unlike the 'group'
-        // condition there is no case where you might want to set up the
-        // condition before you set a grouping - there is no 'any grouping'
-        // option.)
-        return count($this->get_all_groupings($course->id)) > 0;
+        // Only show this option if there are some quizzes in the course.
+        return count($this->get_all_quizzes($course->id)) > 0;
     }
 }
