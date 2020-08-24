@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Restriction by single quiz question version information.
@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'availability_quizquestion';
-$plugin->release = '0.1.0';
 $plugin->version = 2020082400;
-$plugin->requires = 2020061500;
+$plugin->requires = 2019111800;
+$plugin->component = 'availability_quizquestion';
+$plugin->release = 'v0.1 for Moodle 3.8+';
 $plugin->maturity = MATURITY_ALPHA;
