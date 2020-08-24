@@ -30,6 +30,17 @@ defined('MOODLE_INTERNAL') || die();
  * Restriction by single quiz question condition main class.
  */
 class condition extends \core_availability\condition {
+    /** @var array these are the types of state we recognise. */
+    const STATES_USED = ['gradedright', 'gradedpartial', 'gradedwrong'];
+
+    /** @var int the id of the quiz this depends on. */
+    protected $quizid;
+
+    /** @var int the id of the question in the quiz that this depends on. */
+    protected $questionid;
+
+    /** @var \question_state the state the target question must be in. */
+    protected $requiredstate;
 
     /**
      * Constructor.
@@ -42,20 +53,25 @@ class condition extends \core_availability\condition {
         if (isset($structure->quizid) && is_int($structure->quizid)) {
             $this->quizid = $structure->quizid;
         } else {
-            throw new \coding_exception('Invalid -> quizid for quizquestion condition');
+            throw new \coding_exception('Invalid quizid for quizquestion condition');
         }
 
         if (isset($structure->questionid) && is_int($structure->questionid)) {
             $this->questionid = $structure->questionid;
         } else {
-            throw new \coding_exception('Invalid -> questionid for quizquestion condition');
+            throw new \coding_exception('Invalid questionid for quizquestion condition');
         }
 
-        if (isset($structure->requiredstate) && is_bool($structure->requiredstate)) {
-            $this->requiredstate = $structure->requiredstate;
-        } else {
-            throw new \coding_exception('Invalid -> requiredstate for quizquestion condition');
+        if (isset($structure->requiredstate)) {
+            $state = \question_state::get($structure->requiredstate);
+            if ($state && in_array((string) $state, self::STATES_USED)) {
+                $this->requiredstate = $state;
+            }
         }
+        if (!isset($this->requiredstate)) {
+            throw new \coding_exception('Invalid requiredstate for quizquestion condition');
+        }
+
     }
 
     public function save() {
@@ -87,13 +103,13 @@ class condition extends \core_availability\condition {
 
         if (count($attempts) != 0) {
 
-            $attemptobj = quiz_attempt::create(end($attempts)->id);
+            $attemptobj = \quiz_attempt::create(end($attempts)->id);
 
             foreach ($attemptobj->get_slots() as $slot) {
 
                 $qa = $attemptobj->get_question_attempt($slot);
 
-                if (!$qa->get_question_id() == $this->$questionid) {
+                if (!$qa->get_question_id() == $this->questionid) {
                     // This is the qa we need
                     // Todo
                     //$attemptobj->get_question_mark($slot)
@@ -118,9 +134,7 @@ class condition extends \core_availability\condition {
     }
 
     protected function get_debug_string() {
-
-        // Todo;
-        return "Quiz ID: $this->quizid - Question ID: $this->questionid - Requiredstate: $this->requiredstate ";
+        return " quiz:#{$this->quizid}, question:#{$this->questionid}, {$this->requiredstate}";
     }
 
     /**
@@ -159,20 +173,13 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * Wipes the static cache used to store grouping names.
-     */
-    public static function wipe_static_cache() {
-        self::$groupingnames = array();
-    }
-
-    /**
      * Returns a JSON object which corresponds to a condition of this type.
      *
      * Intended for unit testing, as normally the JSON values are constructed
      * by JavaScript code.
      *
      * @param int $groupingid Required grouping id (0 = grouping linked to activity)
-     * @return stdClass Object representing condition
+     * @return \stdClass Object representing condition
      */
     public static function get_json($groupingid = 0) {
         $result = (object)array('type' => 'grouping');
