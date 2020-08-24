@@ -29,3 +29,4 @@ $string['description'] = 'This plugin allows you to limit access to another Mood
 $string['pluginname'] = 'Restriction by single quiz question';
 $string['privacy:metadata'] = 'The Restriction by single quiz question plugin does not store any personal data.';
 $string['title'] = 'Quiz question';
+$string['requires_quizquestion'] = 'You have got <b>{$a->questionid}</b> in <b>{$a->quizid}</b> {$a->requiredstate}';
