@@ -15,23 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Condition main class.
+ * Restriction by single quiz question condition main class.
  *
  * @package availability_quizquestion
- * @copyright 2014 The Open University
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Benjamin Schröder, Thomas Lattner, Alex Keiller
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_grouping;
+namespace availability_quizquestion;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Condition main class.
- *
- * @package availability_grouping
- * @copyright 2014 The Open University
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Restriction by single quiz question condition main class.
  */
 class condition extends \core_availability\condition {
     /** @var array Array from grouping id => name */

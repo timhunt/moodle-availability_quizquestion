@@ -15,14 +15,17 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin strings are defined here.
+ * Restriction by single quiz question language strings.
  *
- * @package     availability_quizquestion
- * @category    string
- * @copyright   2020 Your Name <you@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   availability_quizquestion
+ * @category  string
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Benjamin Schröder, Thomas Lattner, Alex Keiller
+ * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['description'] = 'This plugin allows you to limit access to another Moodle activity base just on the outcome of a single question in a quiz.';
 $string['pluginname'] = 'Restriction by single quiz question';
+$string['privacy:metadata'] = 'The Restriction by single quiz question plugin does not store any personal data.';
+$string['title'] = 'Quiz question';

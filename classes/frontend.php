@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Front-end class.
+ * Restriction by single quiz question front-end class.
  *
  * @package availability_quizquestion
- * @copyright 2020  The Open University
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Benjamin Schröder, Thomas Lattner, Alex Keiller
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,11 +27,7 @@ namespace availability_grouping;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Front-end class.
- *
- * @package availability_grouping
- * @copyright 2014 The Open University
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Restriction by single quiz question front-end class.
  */
 class frontend extends \core_availability\frontend {
     /** @var array Array of grouping info for course */
