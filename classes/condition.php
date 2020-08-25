@@ -113,7 +113,6 @@ class condition extends \core_availability\condition {
             $attemptobj = \quiz_attempt::create(end($attempts)->id);
 
             foreach ($attemptobj->get_slots() as $slot) {
-
                 $qa = $attemptobj->get_question_attempt($slot);
 
                 if ($qa->get_question()->id == $this->questionid) {
@@ -131,7 +130,7 @@ class condition extends \core_availability\condition {
             return '';
         }
 
-        // Todo: Retrieve quiz / question data
+        // Todo: Retrieve quiz / question data.
 
         return get_string('requires_quizquestion', 'availibility_quizquestion',
                 ['quizid' => $this->quizid, 'questionid' => $this->questionid, 'requiredstate' => $this->requiredstate]);
@@ -174,14 +173,5 @@ class condition extends \core_availability\condition {
                 ') has availability condition on module that was not restored',
                 \backup::LOG_WARNING);
         return $questionidchanged;
-    }
-
-    public function update_dependency_id($table, $oldid, $newid) {
-        if ($table === 'groupings' && (int)$this->groupingid === (int)$oldid) {
-            $this->groupingid = $newid;
-            return true;
-        } else {
-            return false;
-        }
     }
 }
