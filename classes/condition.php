@@ -94,9 +94,6 @@ class condition extends \core_availability\condition {
 
     public function is_available($not, \core_availability\info $info, $grabthelot, $userid) {
 
-        $course = $info->get_course();
-        $context = \context_course::instance($info->get_course()->id);
-
         return $this->requirements_fullfilled($userid);
     }
 
@@ -111,7 +108,7 @@ class condition extends \core_availability\condition {
 
         $attempts = quiz_get_user_attempts($this->quizid, $userid, 'finished', true);
 
-        if (count($attempts) != 0) {
+        if (count($attempts) > 0) {
 
             $attemptobj = \quiz_attempt::create(end($attempts)->id);
 
@@ -119,10 +116,18 @@ class condition extends \core_availability\condition {
 
                 $qa = $attemptobj->get_question_attempt($slot);
 
-                if (!$qa->get_question_id() == $this->questionid) {
-                    // This is the qa we need
-                    // Todo
-                    //$attemptobj->get_question_mark($slot)
+                if ($qa->get_question()->id == $this->questionid) {
+
+                    $result;
+                    if ($qa->get_state() == question_state::$gradedright) {
+                        $result = "gradedright";
+                    } else if ($qa->get_state() == question_state::$gradedpartial) {
+                        $result = "gradedpartial";
+                    } else if ($qa->get_state() == question_state::$gradedwrong) {
+                        $result = "gradedwrong";
+                    }
+
+                    return $result == $this->requiredstate;
                 }
             }
         }
