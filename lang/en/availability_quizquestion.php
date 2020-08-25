@@ -19,7 +19,7 @@
  *
  * @package   availability_quizquestion
  * @category  string
- * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Benjamin Schröder, Thomas Lattner, Alex Keiller
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

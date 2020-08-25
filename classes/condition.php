@@ -18,7 +18,7 @@
  * Restriction by single quiz question condition main class.
  *
  * @package availability_quizquestion
- * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Benjamin Schröder, Thomas Lattner, Alex Keiller
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -95,7 +95,7 @@ class condition extends \core_availability\condition {
 
     public function is_available($not, \core_availability\info $info, $grabthelot, $userid) {
 
-        $allow =  $this->requirements_fullfilled($userid);
+        $allow = $this->requirements_fullfilled($userid);
 
         if ($not) {
             $allow = !$allow;

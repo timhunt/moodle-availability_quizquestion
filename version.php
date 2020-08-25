@@ -18,7 +18,7 @@
  * Restriction by single quiz question version information.
  *
  * @package   availability_quizquestion
- * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Benjamin Schröder, Thomas Lattner, Alex Keiller
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,5 +27,5 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version = 2020082400;
 $plugin->requires = 2019111800;
 $plugin->component = 'availability_quizquestion';
-$plugin->release = 'v0.1 for Moodle 3.8+';
-$plugin->maturity = MATURITY_ALPHA;
+$plugin->release = 'v0.9.0 for Moodle 3.8+';
+$plugin->maturity = MATURITY_BETA;

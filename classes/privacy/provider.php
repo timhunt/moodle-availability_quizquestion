@@ -18,7 +18,7 @@
  * Restriction by single quiz question privacy subsystem implementation.
  *
  * @package   availability_quizquestion
- * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Benjamin Schröder, Thomas Lattner, Alex Keiller
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
