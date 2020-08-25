@@ -23,6 +23,8 @@
  */
 
 namespace availability_quizquestion;
+use core\plugininfo\availability;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/questionlib.php');
@@ -135,7 +137,7 @@ class condition extends \core_availability\condition {
     }
 
     public function get_description($full, $not, \core_availability\info $info) {
-        global $CFG, $DB;
+        global $DB;
 
         $quiz = $DB->get_record('quiz', array('id' => $this->quizid), '*');
         $question = $DB->get_record('question', array('id' => $this->questionid), '*');
@@ -145,10 +147,13 @@ class condition extends \core_availability\condition {
                     'quizurl' => (new \moodle_url('/mod/quiz/view.php', ['q' => $quiz->id]))->out(),
                     'quizname' => format_string($quiz->name),
                     'questiontext' => shorten_text(\question_utils::to_plain_text($question->questiontext,
-                            $question->questiontextformat, array('noclean' => true, 'para' => false)), 30),
+                            $question->questiontextformat,
+                            ['noclean' => true, 'para' => false, 'filter' => false]), 30),
                     'requiredstate' => $this->requiredstate->default_string(true),
                 ]);
         }
+
+        return '';
     }
 
     public function update_after_restore($restoreid, $courseid, \base_logger $logger, $name): bool {
