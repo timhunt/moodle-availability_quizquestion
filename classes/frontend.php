@@ -36,7 +36,7 @@ class frontend extends \core_availability\frontend {
     protected $allquizzescourseid;
 
     protected function get_javascript_strings() {
-        return ['label_state', 'label_question'];
+        return ['label_state', 'label_question', 'ajaxerror'];
     }
 
     protected function get_javascript_init_params($course, \cm_info $cm = null,

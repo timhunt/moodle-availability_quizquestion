@@ -60,14 +60,59 @@ M.availability_quizquestion.form.getNode = function(json) {
 
     var node = Y.Node.create('<span class="form-inline">' + html + '</span>');
 
+    var updateQuestions = function(quizNode, questionNode, callback) {
+        var quizId = quizNode.get('value');
+        var url = M.cfg.wwwroot + '/availability/condition/quizquestion/ajax.php?quizid=' + quizId;
+
+        // First, remove all options except the first one from the question drop-down menu.
+        questionNode.all('option').each(function(optionNode) {
+            if (optionNode.get('value') != '') {
+                optionNode.remove();
+            }
+        }, this);
+
+        if (quizId) {
+            // Disable the quiz element until we finish loading it's questions.
+            quizNode.set('disabled', true);
+            Y.io(url, {
+                on: {
+                    success: function(id, response) {
+                        var questions = Y.JSON.parse(response.responseText);
+                        for (var i in questions) {
+                            var questionOption = document.createElement('option');
+                            questionOption.value = questions[i].id;
+                            questionOption.innerHTML = questions[i].name;
+                            questionNode.append(questionOption);
+                        }
+                        // Questions are loaded, so we enable the quiz element now.
+                        quizNode.set('disabled', false);
+
+                        if (callback !== undefined) {
+                            callback();
+                        }
+
+                        M.core_availability.form.update();
+                    },
+                    failure: function() {
+                        window.alert(M.util.get_string('ajaxerror', 'availability_quizquestion'));
+                        // Loading faild. Let's enable the quiz so the user can try again.
+                        quizNode.set('disabled', false);
+                    }
+                }
+            });
+        }
+    };
+
     // Set initial value if specified.
     if (json.quizid !== undefined &&
             node.one('select[name=quizid] > option[value=' + json.quizid + ']')) {
         node.one('select[name=quizid]').set('value', '' + json.quizid);
-    }
-    if (json.questionid !== undefined &&
-            node.one('select[name=questionid] > option[value=' + json.questionid + ']')) {
-        node.one('select[name=questionid]').set('value', '' + json.questionid);
+        updateQuestions(node.one('select[name=quizid]'), node.one('select[name=questionid]'), function() {
+            if (json.questionid !== undefined &&
+                node.one('select[name=questionid] > option[value=' + json.questionid + ']')) {
+                node.one('select[name=questionid]').set('value', '' + json.questionid);
+            }
+        });
     }
     if (json.requiredstate !== undefined &&
             node.one('select[name=requiredstate] > option[value=' + json.requiredstate + ']')) {
@@ -77,21 +122,16 @@ M.availability_quizquestion.form.getNode = function(json) {
     // Add event handlers (first time only).
     if (!M.availability_quizquestion.form.addedEvents) {
         M.availability_quizquestion.form.addedEvents = true;
-        var updateForm = function(input) {
-            var ancestorNode = input.ancestor('span.availability_quizquestion');
-            var quizNode = ancestorNode.one('select[name=quizid]');
-            var questionNode = ancestorNode.one('select[name=questionid]');
-            var stateNode = ancestorNode.one('select[name=requiredstate]');
-            var noQuiz = quizNode.get('value') === '';
-            var noQuestion = questionNode.get('value') === '';
-            questionNode.set('disabled', noQuiz);
-            stateNode.set('disabled', noQuiz || noQuestion);
-            M.core_availability.form.update();
-        };
         var root = Y.one('.availability-field');
         root.delegate('change', function() {
-            updateForm(this);
+            M.core_availability.form.update();
         }, '.availability_quizquestion select');
+        root.delegate('change', function() {
+            var ancestorNode = this.ancestor('span.availability_quizquestion');
+            var quizNode = ancestorNode.one('select[name=quizid]');
+            var questionNode = ancestorNode.one('select[name=questionid]');
+            updateQuestions(quizNode, questionNode);
+        }, '.availability_quizquestion select[name=quizid]');
     }
 
     return node;
