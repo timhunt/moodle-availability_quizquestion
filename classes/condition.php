@@ -117,7 +117,10 @@ class condition extends \core_availability\condition {
                 $qa = $attemptobj->get_question_attempt($slot);
 
                 if ($qa->get_question()->id == $this->questionid) {
-                    return $qa->get_state() === $this->requiredstate;
+                    return $qa->get_state() === $this->requiredstate ||
+                            // If the teacher has manually graded, the state will acutally be something like
+                            // mangrright, so handle that case too by comparing CSS class strings.
+                            $qa->get_state()->get_feedback_class() === $this->requiredstate->get_feedback_class();
                 }
             }
         }
@@ -132,12 +135,13 @@ class condition extends \core_availability\condition {
         $question = $DB->get_record('question', array('id' => $this->questionid), '*');
 
         if ($quiz && $question) {
-            return  get_string('requires_quizquestion', 'availability_quizquestion',
-                            ['quizid' => $this->quizid,
-                            'quizname' => $quiz->name,
-                            'questiontext' => substr($question->questiontext, 0, 10),
-                            'requiredstate' => (string) $this->requiredstate,
-                            'baseurl' => $CFG->wwwroot]);
+            return  get_string('requires_quizquestion', 'availability_quizquestion', [
+                    'quizurl' => new \moodle_url('/mod/quiz/view.php', ['q' => $quiz->id]),
+                    'quizname' => format_string($quiz->name),
+                    'questiontext' => shorten_text(\question_utils::to_plain_text($question->questiontext,
+                            $question->questiontextformat, array('noclean' => true, 'para' => false)), 30),
+                    'requiredstate' => $this->requiredstate->default_string(true),
+                ]);
         }
     }
 

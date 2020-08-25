@@ -83,4 +83,4 @@ Feature: Restriction by single quiz question
     And I log out
     And I am on the "C1" "Course" page logged in as "student"
     Then I should see "Help with reading"
-    And I should see "Not available unless you have got Writing question in Diagnostic quiz incorrect"
+    And I should see "Not available unless: The question I am good at writing? in Diagnostic quiz is Incorrect"
