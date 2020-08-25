@@ -36,4 +36,4 @@ $string['pluginname'] = 'Restriction by single quiz question';
 $string['privacy:metadata'] = 'The Restriction by single quiz question plugin does not store any personal data.';
 $string['questionnumberandname'] = 'Q{$a->number}) {$a->name}';
 $string['title'] = 'Quiz question';
-$string['requires_quizquestion'] = 'You have got <b>{$a->questionid}</b> in <b>{$a->quizid}</b> {$a->requiredstate}';
+$string['requires_quizquestion'] = 'The question "<b>{$a->questiontext} (...)"</b> in quiz <b><a href="{$a->baseurl}/mod/quiz/view.php?id={$a->quizid}">{$a->quizname}</a></b> is marked with <b>{$a->requiredstate}</b>';

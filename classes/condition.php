@@ -126,16 +126,19 @@ class condition extends \core_availability\condition {
     }
 
     public function get_description($full, $not, \core_availability\info $info) {
+        global $CFG, $DB;
 
-        if (!isset($modinfo->instances['quiz'][$this->quizid])) {
-            return '';
+        $quiz = $DB->get_record('quiz', array('id' => $this->quizid), '*');
+        $question = $DB->get_record('question', array('id' => $this->questionid), '*');
+
+        if ($quiz && $question) {
+            return  get_string('requires_quizquestion', 'availability_quizquestion',
+                            ['quizid' => $this->quizid,
+                            'quizname' => $quiz->name,
+                            'questiontext' => substr($question->questiontext, 0, 10),
+                            'requiredstate' => (string) $this->requiredstate,
+                            'baseurl' => $CFG->wwwroot]);
         }
-
-        // Todo: Retrieve quiz / question data.
-
-        return get_string('requires_quizquestion', 'availibility_quizquestion',
-                ['quizid' => $this->quizid, 'questionid' => $this->questionid, 'requiredstate' => $this->requiredstate]);
-
     }
 
     public function update_after_restore($restoreid, $courseid, \base_logger $logger, $name): bool {
