@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Unit tests for the condition class.
  */
-class availability_group_condition_testcase extends \advanced_testcase {
+class condition_testcase extends \advanced_testcase {
     /**
      * Load required classes.
      */
@@ -135,19 +135,6 @@ class availability_group_condition_testcase extends \advanced_testcase {
         $this->assertFalse($cond->is_available(false, $info, true, $user->id));
         $information = $cond->get_description(false, false, $info);
         $this->assertRegExp('~You belong to.*\(Missing group\)~', $information);
-    }
-
-    /**
-     * Tests the update_dependency_id() function.
-     */
-    public function xtest_update_dependency_id() {
-        // TODO.
-        $cond = new condition((object)array('id' => 123));
-        $this->assertFalse($cond->update_dependency_id('frogs', 123, 456));
-        $this->assertFalse($cond->update_dependency_id('groups', 12, 34));
-        $this->assertTrue($cond->update_dependency_id('groups', 123, 456));
-        $after = $cond->save();
-        $this->assertEquals(456, $after->id);
     }
 
     /**

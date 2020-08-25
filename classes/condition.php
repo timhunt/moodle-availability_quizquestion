@@ -75,17 +75,24 @@ class condition extends \core_availability\condition {
     }
 
     public function save() {
-        return (object)array('type' => 'quizquestion',
-                            'quizid' => $this->quizid,
-                            'questionid' => $this->questionid,
-                            'requiredstate' => $this->requiredstate);
+        return self::get_json($this->quizid, $this->questionid, $this->requiredstate);
+    }
 
+    public static function get_json(int $quizid, int $questionid,
+            \question_state $requiredstate): \stdClass {
+        return (object)[
+            'type' => 'quizquestion',
+            'quizid' => $quizid,
+            'questionid' => $questionid,
+            'requiredstate' => (string) $requiredstate
+        ];
+    }
+
+    protected function get_debug_string() {
+        return " quiz:#{$this->quizid}, question:#{$this->questionid}, {$this->requiredstate}";
     }
 
     public function is_available($not, \core_availability\info $info, $grabthelot, $userid) {
-
-        $course = $info->get_course();
-        $context = \context_course::instance($info->get_course()->id);
 
         return $this->requirements_fullfilled($userid);
     }
@@ -101,18 +108,15 @@ class condition extends \core_availability\condition {
 
         $attempts = quiz_get_user_attempts($this->quizid, $userid, 'finished', true);
 
-        if (count($attempts) != 0) {
+        if (count($attempts) > 0) {
 
             $attemptobj = \quiz_attempt::create(end($attempts)->id);
 
             foreach ($attemptobj->get_slots() as $slot) {
-
                 $qa = $attemptobj->get_question_attempt($slot);
 
-                if (!$qa->get_question_id() == $this->questionid) {
-                    // This is the qa we need
-                    // Todo
-                    //$attemptobj->get_question_mark($slot)
+                if ($qa->get_question()->id == $this->questionid) {
+                    return $qa->get_state() === $this->requiredstate;
                 }
             }
         }
@@ -122,73 +126,52 @@ class condition extends \core_availability\condition {
 
     public function get_description($full, $not, \core_availability\info $info) {
 
-        if (!isset($modinfo->instances['quiz'][$this->$quizid])) {
+        if (!isset($modinfo->instances['quiz'][$this->quizid])) {
             return '';
         }
 
-        // Todo: Retrieve quiz / question data
+        // Todo: Retrieve quiz / question data.
 
         return get_string('requires_quizquestion', 'availibility_quizquestion',
                 ['quizid' => $this->quizid, 'questionid' => $this->questionid, 'requiredstate' => $this->requiredstate]);
 
     }
 
-    protected function get_debug_string() {
-        return " quiz:#{$this->quizid}, question:#{$this->questionid}, {$this->requiredstate}";
-    }
-
-    /**
-     * Include this condition only if we are including groups in restore, or
-     * if it's a generic 'same activity' one.
-     *
-     * @param int $restoreid The restore Id.
-     * @param int $courseid The ID of the course.
-     * @param base_logger $logger The logger being used.
-     * @param string $name Name of item being restored.
-     * @param base_task $task The task being performed.
-     *
-     * @return Integer groupid
-     */
-    public function include_after_restore($restoreid, $courseid, \base_logger $logger,
-            $name, \base_task $task) {
-
-        // Todo: Check wether conditions after restore are fullfillable.
-
-        return !$this->groupingid || $task->get_setting_value('groups');
-    }
-
-    public function update_after_restore($restoreid, $courseid, \base_logger $logger, $name) {
+    public function update_after_restore($restoreid, $courseid, \base_logger $logger, $name): bool {
         global $DB;
-        // Todo:
-        return true;
-    }
 
-    public function update_dependency_id($table, $oldid, $newid) {
-        if ($table === 'groupings' && (int)$this->groupingid === (int)$oldid) {
-            $this->groupingid = $newid;
+        // Recode question id.
+        $questionidchanged = false;
+        $rec = \restore_dbops::get_backup_ids_record($restoreid, 'question', $this->questionid);
+        if ($rec && $rec->newitemid) {
+            // New question id found.
+            $this->questionid = (int) $rec->newitemid;
+            $questionidchanged = true;
+        }
+        // If we don't find the new questionid, it is not ideal, but for
+        // now do nothing. The check below will probably generate a warning
+        // about the situation.
+
+        // Recode quiz id.
+        $rec = \restore_dbops::get_backup_ids_record($restoreid, 'quiz', $this->quizid);
+        if ($rec && $rec->newitemid) {
+            // New quiz id found.
+            $this->quizid = (int) $rec->newitemid;
             return true;
-        } else {
-            return false;
         }
-    }
 
-    /**
-     * Returns a JSON object which corresponds to a condition of this type.
-     *
-     * Intended for unit testing, as normally the JSON values are constructed
-     * by JavaScript code.
-     *
-     * @param int $groupingid Required grouping id (0 = grouping linked to activity)
-     * @return \stdClass Object representing condition
-     */
-    public static function get_json($groupingid = 0) {
-        $result = (object)array('type' => 'grouping');
-        if ($groupingid) {
-            $result->id = (int)$groupingid;
-        } else {
-            $result->activity = true;
+        // If we are on the same course (e.g. duplicate) then we can just
+        // use the existing one.
+        if ($DB->record_exists('quiz',
+                ['id' => $this->quizid, 'course' => $courseid])) {
+            return $questionidchanged;
         }
-        return $result;
-    }
 
+        // Otherwise it's a warning.
+        $this->quizid = 0;
+        $logger->process('Restored item (' . $name .
+                ') has availability condition on module that was not restored',
+                \backup::LOG_WARNING);
+        return $questionidchanged;
+    }
 }
