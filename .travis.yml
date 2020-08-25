@@ -57,5 +57,6 @@ script:
   - moodle-plugin-ci savepoints
   - moodle-plugin-ci mustache
   - moodle-plugin-ci grunt || [ "$CHECK_GRUNT" = 'no' ]
+  - moodle-plugin-ci phpdoc || true # The fails are mostly spurious.
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat

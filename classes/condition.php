@@ -97,7 +97,7 @@ class condition extends \core_availability\condition {
 
     public function is_available($not, \core_availability\info $info, $grabthelot, $userid) {
 
-        $allow = $this->requirements_fullfilled($userid);
+        $allow = $this->requirements_fulfilled($userid);
 
         if ($not) {
             $allow = !$allow;
@@ -107,13 +107,12 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * Gets the question result
+     * Determine if the target question is in the expected state.
      *
-     * @param int \userid
-     * @param int course
-     * @return bool
+     * @param int $userid id of the user we are checking for.
+     * @return bool true if the question is in the expected state. Else false.
      */
-    protected function requirements_fullfilled($userid) {
+    protected function requirements_fulfilled($userid) {
 
         $attempts = quiz_get_user_attempts($this->quizid, $userid, 'finished', true);
 
@@ -143,14 +142,19 @@ class condition extends \core_availability\condition {
         $question = $DB->get_record('question', array('id' => $this->questionid), '*');
 
         if ($quiz && $question) {
-            return  get_string('requires_quizquestion', 'availability_quizquestion', [
-                    'quizurl' => (new \moodle_url('/mod/quiz/view.php', ['q' => $quiz->id]))->out(),
-                    'quizname' => format_string($quiz->name),
-                    'questiontext' => shorten_text(\question_utils::to_plain_text($question->questiontext,
-                            $question->questiontextformat,
-                            ['noclean' => true, 'para' => false, 'filter' => false]), 30),
-                    'requiredstate' => $this->requiredstate->default_string(true),
-                ]);
+            $a = [
+                'quizurl' => (new \moodle_url('/mod/quiz/view.php', ['q' => $quiz->id]))->out(),
+                'quizname' => format_string($quiz->name),
+                'questiontext' => shorten_text(\question_utils::to_plain_text($question->questiontext,
+                        $question->questiontextformat,
+                        ['noclean' => true, 'para' => false, 'filter' => false]), 30),
+                'requiredstate' => $this->requiredstate->default_string(true),
+            ];
+            if ($not) {
+                return  get_string('requires_quizquestionnot', 'availability_quizquestion', $a);
+            } else {
+                return  get_string('requires_quizquestion', 'availability_quizquestion', $a);
+            }
         }
 
         return '';

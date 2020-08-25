@@ -37,3 +37,4 @@ $string['privacy:metadata'] = 'The Restriction by single quiz question plugin do
 $string['questionnumberandname'] = 'Q{$a->number}) {$a->name}';
 $string['title'] = 'Quiz question';
 $string['requires_quizquestion'] = 'The question <b>{$a->questiontext}</b> in <b><a href="{$a->quizurl}">{$a->quizname}</a></b> is <b>{$a->requiredstate}</b>';
+$string['requires_quizquestionnot'] = 'The question <b>{$a->questiontext}</b> in <b><a href="{$a->quizurl}">{$a->quizname}</a></b> is not <b>{$a->requiredstate}</b>';

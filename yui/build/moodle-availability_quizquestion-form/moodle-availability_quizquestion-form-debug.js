@@ -33,12 +33,14 @@ M.availability_quizquestion.form.initInner = function(quizzes, states) {
 };
 
 M.availability_quizquestion.form.getNode = function(json) {
+    var i;
+
     // Create HTML structure.
     var html = '<span class="availability-group">';
     html += '<label><span class="p-r-1">' + M.util.get_string('title', 'availability_quizquestion') + '</span> ' +
             '<select name="quizid" class="custom-select">' +
             '<option value="">' + M.util.get_string('choosedots', 'moodle') + '</option>';
-    for (var i = 0; i < this.quizzes.length; i++) {
+    for (i = 0; i < this.quizzes.length; i++) {
         // String has already been escaped using format_string.
         html += '<option value="' + this.quizzes[i].id + '">' + this.quizzes[i].name + '</option>';
     }
@@ -66,7 +68,7 @@ M.availability_quizquestion.form.getNode = function(json) {
         var url = M.cfg.wwwroot + '/availability/condition/quizquestion/ajax.php?quizid=' + quizId;
         // First, remove all options except the first one from the question drop-down menu.
         questionNode.all('option').each(function(optionNode) {
-            if (optionNode.get('value') != '') {
+            if (optionNode.get('value') !== '') {
                 optionNode.remove();
             }
         }, this);
@@ -74,11 +76,13 @@ M.availability_quizquestion.form.getNode = function(json) {
         if (quizId) {
             // Disable the quiz element until we finish loading it's questions.
             quizNode.set('disabled', true);
+            var pendingKey = {};
+            M.util.js_pending(pendingKey);
             Y.io(url, {
                 on: {
                     success: function(id, response) {
                         var questions = Y.JSON.parse(response.responseText);
-                        for (var i in questions) {
+                        for (var i = 0; i < questions.length; i++) {
                             var questionOption = document.createElement('option');
                             questionOption.value = questions[i].id;
                             questionOption.innerHTML = questions[i].name;
@@ -92,11 +96,18 @@ M.availability_quizquestion.form.getNode = function(json) {
                         }
 
                         M.core_availability.form.update();
+                        M.util.js_complete(pendingKey);
                     },
-                    failure: function() {
-                        window.alert(M.util.get_string('ajaxerror', 'availability_quizquestion'));
-                        // Loading faild. Let's enable the quiz so the user can try again.
+                    failure: function(id, response) {
+                        // Loading failed. Let's enable the quiz so the user can try again.
                         quizNode.set('disabled', false);
+                        M.util.js_complete(pendingKey);
+
+                        var debugInfo = response.statusText;
+                        if (M.cfg.developerdebug) {
+                            debugInfo += ' (' + url + ')';
+                        }
+                        new M.core.exception({message: debugInfo});
                     }
                 }
             });
