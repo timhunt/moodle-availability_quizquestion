@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Unit tests for the condition class.
  */
-class availability_group_condition_testcase extends \advanced_testcase {
+class condition_testcase extends \advanced_testcase {
     /**
      * Load required classes.
      */
