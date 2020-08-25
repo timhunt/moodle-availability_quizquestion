@@ -117,17 +117,7 @@ class condition extends \core_availability\condition {
                 $qa = $attemptobj->get_question_attempt($slot);
 
                 if ($qa->get_question()->id == $this->questionid) {
-
-                    $result;
-                    if ($qa->get_state() == question_state::$gradedright) {
-                        $result = "gradedright";
-                    } else if ($qa->get_state() == question_state::$gradedpartial) {
-                        $result = "gradedpartial";
-                    } else if ($qa->get_state() == question_state::$gradedwrong) {
-                        $result = "gradedwrong";
-                    }
-
-                    return $result == $this->requiredstate;
+                    return $qa->get_state() === $this->requiredstate;
                 }
             }
         }
@@ -137,7 +127,7 @@ class condition extends \core_availability\condition {
 
     public function get_description($full, $not, \core_availability\info $info) {
 
-        if (!isset($modinfo->instances['quiz'][$this->$quizid])) {
+        if (!isset($modinfo->instances['quiz'][$this->quizid])) {
             return '';
         }
 

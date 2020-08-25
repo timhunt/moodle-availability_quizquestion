@@ -138,19 +138,6 @@ class condition_testcase extends \advanced_testcase {
     }
 
     /**
-     * Tests the update_dependency_id() function.
-     */
-    public function xtest_update_dependency_id() {
-        // TODO.
-        $cond = new condition((object)array('id' => 123));
-        $this->assertFalse($cond->update_dependency_id('frogs', 123, 456));
-        $this->assertFalse($cond->update_dependency_id('groups', 12, 34));
-        $this->assertTrue($cond->update_dependency_id('groups', 123, 456));
-        $after = $cond->save();
-        $this->assertEquals(456, $after->id);
-    }
-
-    /**
      * Tests the filter_users (bulk checking) function. Also tests the SQL
      * variant get_user_list_sql.
      */

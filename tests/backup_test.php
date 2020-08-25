@@ -36,70 +36,166 @@ use core_availability\info_module;
  */
 class backup_testcase extends \advanced_testcase {
 
-    public function test_backup_and_restore_a_course() {
-        global $CFG, $DB;
+    protected function setUp() {
+        global $CFG;
+        parent::setUp();
         $this->resetAfterTest();
         $this->setAdminUser();
         $CFG->enableavailability = true;
+    }
+
+    public function test_backup_and_restore_a_course() {
 
         // Make a test course.
         $generator = $this->getDataGenerator();
         $course = $generator->create_course();
-        $context = \context_course::instance($course->id);
 
         // Create a quiz with a question.
-        $quiz = $generator->create_module('quiz', ['course' => $course->id]);
+        [$quiz, $question] = $this->create_a_quiz_with_one_question($course);
+
+        // Create a page which depends on that question.
+        $page = $generator->create_module('page', ['course' => $course->id]);
+        $this->make_activity_depend_on_quiz_question($course, $page->cmid, $quiz, $question);
+
+        // Backup and restore the course.
+        $backupid = $this->backup_course($course);
+        $newcourseid = $this->restore_course($backupid);
+
+        // Verify the condition on the restored page.
+        $this->assert_page_depends_on_quiz_in_course($newcourseid);
+    }
+
+    public function test_duplicate_activity_in_one_course() {
+
+        // Make a test course.
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+
+        // Create a quiz with a question.
+        [$quiz, $question] = $this->create_a_quiz_with_one_question($course);
+
+        // Create a page which depends on that question.
+        $page = $generator->create_module('page', ['course' => $course->id]);
+        $this->make_activity_depend_on_quiz_question($course, $page->cmid, $quiz, $question);
+
+        // Duplicate the page.
+        $newpagecm = duplicate_module($course, get_fast_modinfo($course)->get_cm($page->cmid));
+
+        // Verify the condition on the duplicated page.
+        $this->assertEquals('&(+{quizquestion: quiz:#' . $quiz->id .
+                ', question:#' . $question->id . ', gradedwrong})',
+                (string) (new info_module($newpagecm))->get_availability_tree());
+
+    }
+
+    public function test_backup_and_restore_with_reverse_order() {
+        // Verifies that the recoding of ids works even if the quiz comes after the page.
+
+        // Make a test course.
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+
+        // Create a page first.
+        $page = $generator->create_module('page', ['course' => $course->id]);
+
+        // Create a quiz with a question.
+        [$quiz, $question] = $this->create_a_quiz_with_one_question($course);
+
+        // Make the page depend on that question.
+        $this->make_activity_depend_on_quiz_question($course, $page->cmid, $quiz, $question);
+
+        // Backup and restore the course.
+        $backupid = $this->backup_course($course);
+        $newcourseid = $this->restore_course($backupid);
+
+        // Verify the condition on the restored page.
+        $this->assert_page_depends_on_quiz_in_course($newcourseid);
+    }
+
+    /**
+     * In the given course, create a quiz with one question.
+     *
+     * The question is created in a question category named 'Test questions'.
+     *
+     * @param \stdClass $course
+     * @return array
+     */
+    protected function create_a_quiz_with_one_question(\stdClass $course): array {
+        $generator = $this->getDataGenerator();
+        /** @var \core_question_generator $questiongenerator */
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+
+        $context = \context_course::instance($course->id);
+        $quiz = $generator->create_module('quiz', ['course' => $course->id]);
         $category = $questiongenerator->create_question_category(
                 ['contextid' => $context->id, 'name' => 'Test questions']);
         $question = $questiongenerator->create_question('multichoice', null,
                 ['category' => $category->id]);
         quiz_add_quiz_question($question->id, $quiz);
 
-        // Create a page which depends on that question.
-        $page = $generator->create_module('page', ['course' => $course->id]);
-        $modinfo = get_fast_modinfo($course);
-        $pagecm = $modinfo->instances['page'][$page->id];
+        return [$quiz, $question];
+    }
+
+    /**
+     * In a course, make an activity depend on getting this question wrong in the given quiz.
+     *
+     * @param \stdClass $course
+     * @param int $cmid
+     * @param \stdClass $quiz
+     * @param \stdClass $question
+     */
+    protected function make_activity_depend_on_quiz_question(
+            \stdClass $course, int $cmid, \stdClass $quiz, \stdClass $question): void {
+        global $DB;
+
         $restriction = \core_availability\tree::get_root_json(
                 [\availability_quizquestion\condition::get_json(
                         $quiz->id, $question->id, \question_state::$gradedwrong)]);
         $DB->set_field('course_modules', 'availability',
-                json_encode($restriction), ['id' => $pagecm->id]);
+                json_encode($restriction), ['id' => $cmid]);
         rebuild_course_cache($course->id, true);
+    }
 
-        // Backup the course.
-        $backupid = $this->backup_course($course);
-
-        // Restore it.
-        $newcourseid = $this->restore_course($backupid);
-
-        // Verify the condition on the restored page.
-        $newmodinfo = get_fast_modinfo($newcourseid);
-        $newpagecms = $newmodinfo->instances['page'];
-        $newpagecm = reset($newpagecms);
-        $newquizcms = $newmodinfo->instances['quiz'];
-        $newquizcm = reset($newquizcms);
-
-        $newcoursecontext = \context_course::instance($newcourseid);
-        $newquestioncategory = $DB->get_record('question_categories',
-                ['contextid' => $newcoursecontext->id, 'name' => 'Test questions']);
-        $newquestion = $DB->get_record('question',
-                ['category' => $newquestioncategory->id]);
-
-        $info = new info_module($newpagecm);
+    /**
+     * Assert that, in a course, the first page depends on the only question in the first quiz.
+     *
+     * @param int $courseid course id.
+     */
+    protected function assert_page_depends_on_quiz_in_course(int $courseid): void {
+        $newpagecm = $this->find_activity($courseid, 'page');
+        $newquizcm = $this->find_activity($courseid, 'quiz');
+        $newquestion = $this->find_test_question_from_course($courseid);
         $this->assertEquals('&(+{quizquestion: quiz:#' . $newquizcm->instance .
                 ', question:#' . $newquestion->id . ', gradedwrong})',
-                (string) $info->get_availability_tree());
+                (string) (new info_module($newpagecm))->get_availability_tree());
     }
 
-    public function test_duplicate_activity_in_one_course() {
-        $this->markTestIncomplete();
+    /**
+     * Get the first activity of a given type from a course.
+     *
+     * @param int $courseid id of the course to look in.
+     * @param string $modname type of activity, e.g. 'quiz'.
+     * @return \cm_info row from the question DB table.
+     */
+    protected function find_activity(int $courseid, string $modname): \cm_info {
+        $newmodinfo = get_fast_modinfo($courseid);
+        $cms = $newmodinfo->instances[$modname];
+        return reset($cms);
     }
 
-
-    public function test_backup_and_restore_with_reverse_order() {
-        // Verifies that the recoding of ids works even if the quiz comes after the page.
-        $this->markTestIncomplete();
+    /**
+     * Get the only question in a category called 'Test questions' in a given course.
+     *
+     * @param int $courseid id of the course to look in.
+     * @return \stdClass row from the question DB table.
+     */
+    protected function find_test_question_from_course(int $courseid): \stdClass {
+        global $DB;
+        $coursecontext = \context_course::instance($courseid);
+        $questioncategory = $DB->get_record('question_categories',
+                ['contextid' => $coursecontext->id, 'name' => 'Test questions']);
+        return $DB->get_record('question',
+                ['category' => $questioncategory->id]);
     }
 
     /**
