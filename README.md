@@ -1,9 +1,12 @@
 # Restriction by single quiz question # [![Build Status](https://travis-ci.com/timhunt/moodle-availability_quizquestion.svg?branch=main)](https://travis-ci.com/timhunt/moodle-availability_quizquestion)
 
-This is a Moodle conditional availability rule, which makes it possile
+This is a Moodle conditional availability rule, which makes it possible
 to show or hide another resource, based on the state of one particular question
 in one quiz. So, if you want show a particular help document to students
 who got Question 2 in the quiz wrong, well this plugin lets you do that.
+
+At the moment, this only supports non-random questions, but it may be possible
+to extend it in the future.
 
 
 ## To install ##
@@ -18,6 +21,23 @@ Moodle site:
     echo '/availability/condition/quizquestion/' >> .git/info/exclude
 
 Then visit Admin -> Notifications to complete the installation.
+
+
+## To use ##
+
+To use this plugin, the 'Enable restricted access' setting must be switched on
+for your Moodle site under 'Administration -> Advanced features'.
+
+Then, when you are creating or editing an activity a course, there will be a new
+possibility in the 'Restrict access' section of the form. When you click
+'Add restriction ...', if there are any quizzes in the course, then you
+will see a 'Quiz question' button. You then select a quiz, and one of the questions
+in the quiz, and a required state (for example 'Incorrect'). Then, the activity
+you are editing will only be available to students where, in their most recent
+completed attempt, that question is in that state.
+
+For more information, see the Moodle documentation about
+[Restrict access settings](https://docs.moodle.org/en/Restrict_access_settings).
 
 
 ## Credits ##
