@@ -15,23 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Handles AJAX processing (convert date to timestamp using current calendar).
+ * Handles AJAX requests to get the list of questions in a quiz.
  *
  * @package   availability_quizquestion
  * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Benjamin Schröder, Thomas Lattner, Alex Keiller
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use availability_quizquestion\question_list_fetcher;
+
 define('AJAX_SCRIPT', true);
 require(__DIR__ . '/../../../config.php');
 
 $quizid = required_param('quizid', PARAM_INT);
 
-// To be replaced with correct code.
-$questions = [
-    (object)['id' => 5, 'name' => 'Q1'],
-    (object)['id' => 7, 'name' => 'Q2'],
-    (object)['id' => 8, 'name' => 'Q3'],
-];
+// Check login and permissions.
+$quiz = $DB->get_record('quiz', array('id' => $quizid), '*', MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $quiz->course));
+$cm = get_coursemodule_from_instance("quiz", $quiz->id, $course->id);
 
-echo json_encode($questions);
+require_login($course, false, $cm);
+$context = context_module::instance($cm->id);
+require_capability('mod/quiz:viewreports', $context);
+
+echo json_encode(question_list_fetcher::list_questions_in_quiz($quizid));

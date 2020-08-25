@@ -41,15 +41,15 @@ class frontend extends \core_availability\frontend {
 
     protected function get_javascript_init_params($course, \cm_info $cm = null,
             \section_info $section = null) {
+
         // Get all quizzes for course.
         $quizzes = $this->get_all_quizzes($course->id);
-
         $context = \context_course::instance($course->id);
-
         array_walk($quizzes, function($quiz) use ($context) {
             $quiz->name = format_string($quiz->name, true, ['context' => $context]);
         });
 
+        // Get the possible expected states.
         $states = [
             'gradedright' => get_string('correct', 'quiz'),
             'gradedpartial' => get_string('partiallycorrect', 'quiz'),
@@ -69,10 +69,14 @@ class frontend extends \core_availability\frontend {
      * @return array Array of quiz objects
      */
     protected function get_all_quizzes($courseid) {
-        global $DB;
         if ($courseid != $this->allquizzescourseid) {
-            $this->allquizzes = $DB->get_records('quiz', ['course' => $courseid], 'name', 'id, name');
-            $this->allquizzescourseid = $courseid;
+            $this->allquizzes = [];
+            $modinfo = get_fast_modinfo($courseid);
+            foreach ($modinfo->get_instances_of('quiz') as $cm) {
+                if (has_capability('mod/quiz:viewreports', \context_module::instance($cm->id))) {
+                    $this->allquizzes[] = (object) ['id' => $cm->instance, 'name' => $cm->name];
+                }
+            }
         }
         return $this->allquizzes;
     }
@@ -81,6 +85,6 @@ class frontend extends \core_availability\frontend {
             \section_info $section = null) {
 
         // Only show this option if there are some quizzes in the course.
-        return count($this->get_all_quizzes($course->id)) > 0;
+        return !empty($this->get_all_quizzes($course->id));
     }
 }

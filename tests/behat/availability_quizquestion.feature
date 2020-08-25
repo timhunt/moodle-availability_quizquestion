@@ -42,9 +42,9 @@ Feature: Restriction by single quiz question
       | Page content | Open your eyes!   |
     And I click on "Add restriction..." "button"
     And I click on "Quiz question" "button" in the "Add restriction..." "dialogue"
-    And I set the field "Quiz" to "Diagnostic quiz"
-    And I set the field "Question" to "Writing"
-    And I set the field "State" to "Incorrect"
+    And I set the field "Quiz question" to "Diagnostic quiz"
+    And I set the field "Which question in the selected quiz" to "Q1) Reading"
+    And I set the field "Required state" to "Incorrect"
     And I click on "Displayed greyed-out if user does not meet this condition" "link"
     And I click on "Save and return to course" "button"
 
@@ -76,11 +76,11 @@ Feature: Restriction by single quiz question
       | Page content | Open your eyes!   |
     And I click on "Add restriction..." "button"
     And I click on "Quiz question" "button" in the "Add restriction..." "dialogue"
-    And I set the field "Quiz" to "Diagnostic quiz"
-    And I set the field "Question" to "Writing"
-    And I set the field "State" to "Incorrect"
+    And I set the field "Quiz question" to "Diagnostic quiz"
+    And I set the field "Which question in the selected quiz" to "Q2) Writing"
+    And I set the field "Required state" to "Incorrect"
     And I click on "Save and return to course" "button"
     And I log out
     And I am on the "C1" "Course" page logged in as "student"
     Then I should see "Help with reading"
-    And I should see "Not available unless you have got Reading question in Diagnostic quiz incorrect"
+    And I should see "Not available unless you have got Writing question in Diagnostic quiz incorrect"

@@ -47,9 +47,8 @@ M.availability_quizquestion.form.getNode = function(json) {
             '<option value="">' + M.util.get_string('choosedots', 'moodle') + '</option>';
     html += '</select></label>';
 
-    html += ' <lebel><span class="sr-only">' + M.util.get_string('label_state', 'availability_quizquestion') + '</span>' +
-            '<select name="requiredstate" title="' + M.util.get_string('label_operator', 'availability_profile') + '"' +
-            ' class="custom-select">' +
+    html += ' <label><span class="sr-only">' + M.util.get_string('label_state', 'availability_quizquestion') + '</span>' +
+            '<select name="requiredstate" class="custom-select">' +
             '<option value="">' + M.util.get_string('choosedots', 'moodle') + '</option>';
     for (i = 0; i < this.states.length; i++) {
         html += '<option value="' + this.states[i].shortname + '">' + this.states[i].displayname + '</option>';
@@ -63,7 +62,6 @@ M.availability_quizquestion.form.getNode = function(json) {
     var updateQuestions = function(quizNode, questionNode, callback) {
         var quizId = quizNode.get('value');
         var url = M.cfg.wwwroot + '/availability/condition/quizquestion/ajax.php?quizid=' + quizId;
-
         // First, remove all options except the first one from the question drop-down menu.
         questionNode.all('option').each(function(optionNode) {
             if (optionNode.get('value') != '') {

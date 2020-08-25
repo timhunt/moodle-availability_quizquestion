@@ -23,8 +23,9 @@
  */
 
 namespace availability_quizquestion;
-
 defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir . '/questionlib.php');
 
 /**
  * Restriction by single quiz question condition main class.
