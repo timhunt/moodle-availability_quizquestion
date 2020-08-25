@@ -95,7 +95,13 @@ class condition extends \core_availability\condition {
 
     public function is_available($not, \core_availability\info $info, $grabthelot, $userid) {
 
-        return $this->requirements_fullfilled($userid);
+        $allow =  $this->requirements_fullfilled($userid);
+
+        if ($not) {
+            $allow = !$allow;
+        }
+
+        return $allow;
     }
 
     /**
@@ -136,7 +142,7 @@ class condition extends \core_availability\condition {
 
         if ($quiz && $question) {
             return  get_string('requires_quizquestion', 'availability_quizquestion', [
-                    'quizurl' => new \moodle_url('/mod/quiz/view.php', ['q' => $quiz->id]),
+                    'quizurl' => (new \moodle_url('/mod/quiz/view.php', ['q' => $quiz->id]))->out(),
                     'quizname' => format_string($quiz->name),
                     'questiontext' => shorten_text(\question_utils::to_plain_text($question->questiontext,
                             $question->questiontextformat, array('noclean' => true, 'para' => false)), 30),

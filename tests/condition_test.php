@@ -69,8 +69,8 @@ class condition_testcase extends \advanced_testcase {
         $this->assertEquals($structure, $cond->save());
     }
 
-    public function xtest_usage() {
-        global $CFG, $USER;
+    public function test_usage() {
+        global $CFG;
         $this->resetAfterTest();
         $CFG->enableavailability = true;
 
@@ -84,145 +84,65 @@ class condition_testcase extends \advanced_testcase {
 
         // Create a quiz with a question.
         $quiz = $generator->create_module('quiz', ['course' => $course->id]);
+        /** @var \core_question_generator $questiongenerator */
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $questiongenerator->create_question_category(
                 ['contextid' => $context->id]);
-        $question = $questiongenerator->create_question('multichoice', null,
+        $question = $questiongenerator->create_question('numerical', null,
                 ['category' => $category->id]);
         quiz_add_quiz_question($question->id, $quiz);
+        quiz_update_sumgrades($quiz);
 
         // Do test (user has not attempted the quiz yet).
         $cond = new condition((object) [
                 'quizid' => (int) $quiz->id, 'questionid' => (int) $question->id,
-                'state' => (string) \question_state::$gradedwrong]);
+                'requiredstate' => (string) \question_state::$gradedwrong]);
 
         // Check if available (when not available).
         $this->assertFalse($cond->is_available(false, $info, true, $user->id));
         $information = $cond->get_description(false, false, $info);
-        $this->assertRegExp('~You belong to.*G1!~', $information);
+        $this->assertContains('The question <b>What is pi to two d.p.?</b> in', $information);
+        $this->assertContains('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
         $this->assertTrue($cond->is_available(true, $info, true, $user->id));
 
-        // Add user to groups and refresh cache.
-        groups_add_member($group1, $user);
-        groups_add_member($group2, $user);
-        get_fast_modinfo($course->id, 0, true);
+        // User attempts the quiz and get the question right.
+        $timenow = time();
+        $quizobj = \quiz::create($quiz->id, $user->id);
+        $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
+        $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+        $attempt = quiz_create_attempt($quizobj, 1, null, $timenow, false, $user->id);
+        quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
+        quiz_attempt_save_started($quizobj, $quba, $attempt);
+        $attemptobj = \quiz_attempt::create($attempt->id);
+        $tosubmit = array(1 => array('answer' => '3.14'));
+        $attemptobj->process_submitted_actions(time(), false, $tosubmit);
+        $attemptobj->process_finish(time(), false);
+
+        // Recheck.
+        $this->assertFalse($cond->is_available(false, $info, true, $user->id));
+        $this->assertTrue($cond->is_available(true, $info, true, $user->id));
+        $information = $cond->get_description(false, true, $info);
+        $this->assertContains('The question <b>What is pi to two d.p.?</b> in', $information);
+        $this->assertContains('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
+
+        // User attempts the quiz and get the question wrong.
+        $timenow = time();
+        $quizobj = \quiz::create($quiz->id, $user->id);
+        $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
+        $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+        $attempt = quiz_create_attempt($quizobj, 2, null, $timenow, false, $user->id);
+        quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
+        quiz_attempt_save_started($quizobj, $quba, $attempt);
+        $attemptobj = \quiz_attempt::create($attempt->id);
+        $tosubmit = array(1 => array('answer' => '42'));
+        $attemptobj->process_submitted_actions(time(), false, $tosubmit);
+        $attemptobj->process_finish(time(), false);
 
         // Recheck.
         $this->assertTrue($cond->is_available(false, $info, true, $user->id));
         $this->assertFalse($cond->is_available(true, $info, true, $user->id));
         $information = $cond->get_description(false, true, $info);
-        $this->assertRegExp('~do not belong to.*G1!~', $information);
-
-        // Check group 2 works also.
-        $cond = new condition((object)array('id' => (int)$group2->id));
-        $this->assertTrue($cond->is_available(false, $info, true, $user->id));
-
-        // What about an 'any group' condition?
-        $cond = new condition((object)array());
-        $this->assertTrue($cond->is_available(false, $info, true, $user->id));
-        $this->assertFalse($cond->is_available(true, $info, true, $user->id));
-        $information = $cond->get_description(false, true, $info);
-        $this->assertRegExp('~do not belong to any~', $information);
-
-        // Admin user doesn't belong to a group, but they can access it
-        // either way (positive or NOT).
-        $this->setAdminUser();
-        $this->assertTrue($cond->is_available(false, $info, true, $USER->id));
-        $this->assertTrue($cond->is_available(true, $info, true, $USER->id));
-
-        // Group that doesn't exist uses 'missing' text.
-        $cond = new condition((object)array('id' => $group2->id + 1000));
-        $this->assertFalse($cond->is_available(false, $info, true, $user->id));
-        $information = $cond->get_description(false, false, $info);
-        $this->assertRegExp('~You belong to.*\(Missing group\)~', $information);
-    }
-
-    /**
-     * Tests the filter_users (bulk checking) function. Also tests the SQL
-     * variant get_user_list_sql.
-     */
-    public function xtest_filter_users() {
-        // TODO.
-        global $DB;
-        $this->resetAfterTest();
-
-        // Erase static cache before test.
-        condition::wipe_static_cache();
-
-        // Make a test course and some users.
-        $generator = $this->getDataGenerator();
-        $course = $generator->create_course();
-        $roleids = $DB->get_records_menu('role', null, '', 'shortname, id');
-        $teacher = $generator->create_user();
-        $generator->enrol_user($teacher->id, $course->id, $roleids['editingteacher']);
-        $allusers = array($teacher->id => $teacher);
-        $students = array();
-        for ($i = 0; $i < 3; $i++) {
-            $student = $generator->create_user();
-            $students[$i] = $student;
-            $generator->enrol_user($student->id, $course->id, $roleids['student']);
-            $allusers[$student->id] = $student;
-        }
-        $info = new \core_availability\mock_info($course);
-
-        // Make test groups.
-        $group1 = $generator->create_group(array('courseid' => $course->id));
-        $group2 = $generator->create_group(array('courseid' => $course->id));
-
-        // Assign students to groups as follows (teacher is not in a group):
-        // 0: no groups.
-        // 1: in group 1.
-        // 2: in group 2.
-        groups_add_member($group1, $students[1]);
-        groups_add_member($group2, $students[2]);
-
-        // Test 'any group' condition.
-        $checker = new \core_availability\capability_checker($info->get_context());
-        $cond = new condition((object)array());
-        $result = array_keys($cond->filter_user_list($allusers, false, $info, $checker));
-        ksort($result);
-        $expected = array($teacher->id, $students[1]->id, $students[2]->id);
-        $this->assertEquals($expected, $result);
-
-        // Test it with get_user_list_sql.
-        list ($sql, $params) = $cond->get_user_list_sql(false, $info, true);
-        $result = $DB->get_fieldset_sql($sql, $params);
-        sort($result);
-        $this->assertEquals($expected, $result);
-
-        // Test NOT version (note that teacher can still access because AAG works
-        // both ways).
-        $result = array_keys($cond->filter_user_list($allusers, true, $info, $checker));
-        ksort($result);
-        $expected = array($teacher->id, $students[0]->id);
-        $this->assertEquals($expected, $result);
-
-        // Test with get_user_list_sql.
-        list ($sql, $params) = $cond->get_user_list_sql(true, $info, true);
-        $result = $DB->get_fieldset_sql($sql, $params);
-        sort($result);
-        $this->assertEquals($expected, $result);
-
-        // Test specific group.
-        $cond = new condition((object)array('id' => (int)$group1->id));
-        $result = array_keys($cond->filter_user_list($allusers, false, $info, $checker));
-        ksort($result);
-        $expected = array($teacher->id, $students[1]->id);
-        $this->assertEquals($expected, $result);
-
-        list ($sql, $params) = $cond->get_user_list_sql(false, $info, true);
-        $result = $DB->get_fieldset_sql($sql, $params);
-        sort($result);
-        $this->assertEquals($expected, $result);
-
-        $result = array_keys($cond->filter_user_list($allusers, true, $info, $checker));
-        ksort($result);
-        $expected = array($teacher->id, $students[0]->id, $students[2]->id);
-        $this->assertEquals($expected, $result);
-
-        list ($sql, $params) = $cond->get_user_list_sql(true, $info, true);
-        $result = $DB->get_fieldset_sql($sql, $params);
-        sort($result);
-        $this->assertEquals($expected, $result);
+        $this->assertContains('The question <b>What is pi to two d.p.?</b> in', $information);
+        $this->assertContains('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
     }
 }
