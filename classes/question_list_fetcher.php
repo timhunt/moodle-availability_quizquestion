@@ -16,6 +16,8 @@
 
 namespace availability_quizquestion;
 
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
 
@@ -38,7 +40,7 @@ class question_list_fetcher {
                   FROM {question} q
                   JOIN {quiz_slots} slot ON slot.questionid = q.id
                  WHERE slot.quizid = ?
-              ORDER BY slot.slot 
+              ORDER BY slot.slot
                 ", [$quizid]);
 
         $choices = [];
