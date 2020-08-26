@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['ajaxerror'] = 'Error contacting server to obtain quiz questions';
-$string['description'] = 'This plugin allows you to limit access to another Moodle activity base just on the outcome of a single question in a quiz.';
+$string['description'] = 'This plugin allows you to limit access to another Moodle activity based just on the outcome of a single question in a quiz.';
 $string['error_selectquiz'] = 'You must select a quiz.';
 $string['error_selectquestion'] = 'You must select a question.';
 $string['error_selectstate'] = 'You must select a state.';
