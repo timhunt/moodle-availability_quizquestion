@@ -37,7 +37,7 @@ you are editing will only be available to students where, in their most recent
 completed attempt, that question is in that state.
 
 For more information, see the Moodle documentation about
-[Restrict access settings](https://docs.moodle.org/en/restrict_access_settings).
+[Restrict access settings](https://docs.moodle.org/en/Restrict access settings).
 
 
 ## Credits ##
