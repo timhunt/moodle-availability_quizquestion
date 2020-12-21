@@ -2,8 +2,8 @@
 
 ## Changes in 1.0
 
-* No changed. Just incrementing version number now this has had a
-  period of testing with no issues.
+* Time to call this a stable release.
+* Fixed a small bug with how the quiz name is formatted for output.
 
 
 ## Changes in 0.9.1
