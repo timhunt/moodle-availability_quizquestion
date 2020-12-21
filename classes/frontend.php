@@ -44,10 +44,6 @@ class frontend extends \core_availability\frontend {
 
         // Get all quizzes for course.
         $quizzes = $this->get_all_quizzes($course->id);
-        $context = \context_course::instance($course->id);
-        array_walk($quizzes, function($quiz) use ($context) {
-            $quiz->name = format_string($quiz->name, true, ['context' => $context]);
-        });
 
         // Get the possible expected states.
         $states = [
@@ -66,7 +62,7 @@ class frontend extends \core_availability\frontend {
      * Gets all the quizzes on the course.
      *
      * @param int $courseid Course id
-     * @return array Array of quiz objects
+     * @return array Array objects with fields id and name (which has been formatted with format_string.
      */
     protected function get_all_quizzes($courseid) {
         if ($courseid != $this->allquizzescourseid) {
@@ -74,7 +70,9 @@ class frontend extends \core_availability\frontend {
             $modinfo = get_fast_modinfo($courseid);
             foreach ($modinfo->get_instances_of('quiz') as $cm) {
                 if (has_capability('mod/quiz:viewreports', \context_module::instance($cm->id))) {
-                    $this->allquizzes[] = (object) ['id' => $cm->instance, 'name' => $cm->name];
+                    $this->allquizzes[] = (object) ['id' => $cm->instance,
+                            'name' => format_string($cm->name, true,
+                                    ['context' => \context_module::instance($cm->id)])];
                 }
             }
         }
