@@ -37,7 +37,7 @@ use core_availability\info_module;
  */
 class backup_testcase extends \advanced_testcase {
 
-    protected function setUp() {
+    protected function setUp(): void {
         global $CFG;
         parent::setUp();
         $this->resetAfterTest();
