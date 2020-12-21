@@ -1,4 +1,4 @@
-# Restriction by single quiz question # [![Build Status](https://travis-ci.com/timhunt/moodle-availability_quizquestion.svg?branch=main)](https://travis-ci.com/timhunt/moodle-availability_quizquestion)
+# Restriction by single quiz question #
 
 This is a Moodle conditional availability rule, which makes it possible
 to show or hide another resource, based on the state of one particular question

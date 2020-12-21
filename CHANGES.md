@@ -1,5 +1,10 @@
 # Change log for the estriction by single quiz question availability condition
 
+## Changes in 1.0
+
+* No changed. Just incrementing version number now this has had a
+  period of testing with no issues.
+
 
 ## Changes in 0.9.1
 
