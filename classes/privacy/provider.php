@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_grouping\privacy;
+namespace availability_quizquestion\privacy;
 
 defined('MOODLE_INTERNAL') || die();
 
