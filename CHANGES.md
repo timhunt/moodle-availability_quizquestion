@@ -1,5 +1,10 @@
 # Change log for the estriction by single quiz question availability condition
 
+## Changes in 1.1
+
+* Fix a bug where the privacy provider code used the wrong namespace. (Thanks Luca Bösch.)
+
+
 ## Changes in 1.0
 
 * Time to call this a stable release.
