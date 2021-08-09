@@ -102,14 +102,14 @@ class condition_testcase extends \advanced_testcase {
         // Check if available (when not available).
         $this->assertFalse($cond->is_available(false, $info, true, $user->id));
         $information = $cond->get_description(false, false, $info);
-        $this->assertContains('The question <b>What is pi to two d.p.?</b> in', $information);
-        $this->assertContains('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
+        $this->assertStringContainsString('The question <b>What is pi to two d.p.?</b> in', $information);
+        $this->assertStringContainsString('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
 
         // Check with not.
         $this->assertTrue($cond->is_available(true, $info, true, $user->id));
         $information = $cond->get_description(false, true, $info);
-        $this->assertContains('The question <b>What is pi to two d.p.?</b> in', $information);
-        $this->assertContains('>Quiz 1</a></b> is not <b>Incorrect</b>', $information);
+        $this->assertStringContainsString('The question <b>What is pi to two d.p.?</b> in', $information);
+        $this->assertStringContainsString('>Quiz 1</a></b> is not <b>Incorrect</b>', $information);
 
         // User attempts the quiz and get the question right.
         $timenow = time();
@@ -128,8 +128,8 @@ class condition_testcase extends \advanced_testcase {
         $this->assertFalse($cond->is_available(false, $info, true, $user->id));
         $this->assertTrue($cond->is_available(true, $info, true, $user->id));
         $information = $cond->get_description(false, false, $info);
-        $this->assertContains('The question <b>What is pi to two d.p.?</b> in', $information);
-        $this->assertContains('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
+        $this->assertStringContainsString('The question <b>What is pi to two d.p.?</b> in', $information);
+        $this->assertStringContainsString('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
 
         // User attempts the quiz and get the question wrong.
         $timenow = time();
@@ -148,7 +148,7 @@ class condition_testcase extends \advanced_testcase {
         $this->assertTrue($cond->is_available(false, $info, true, $user->id));
         $this->assertFalse($cond->is_available(true, $info, true, $user->id));
         $information = $cond->get_description(false, false, $info);
-        $this->assertContains('The question <b>What is pi to two d.p.?</b> in', $information);
-        $this->assertContains('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
+        $this->assertStringContainsString('The question <b>What is pi to two d.p.?</b> in', $information);
+        $this->assertStringContainsString('>Quiz 1</a></b> is <b>Incorrect</b>', $information);
     }
 }
