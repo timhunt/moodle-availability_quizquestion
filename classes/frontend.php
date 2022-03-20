@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace availability_quizquestion;
+
 /**
  * Restriction by single quiz question front-end class.
  *
@@ -21,26 +23,19 @@
  * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace availability_quizquestion;
-
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * Restriction by single quiz question front-end class.
- */
 class frontend extends \core_availability\frontend {
     /** @var array Array of quiz info for course */
     protected $allquizzes;
+
     /** @var int Course id that $allquizzes is for */
     protected $allquizzescourseid;
 
-    protected function get_javascript_strings() {
+    protected function get_javascript_strings(): array {
         return ['label_state', 'label_question', 'ajaxerror'];
     }
 
     protected function get_javascript_init_params($course, \cm_info $cm = null,
-            \section_info $section = null) {
+            \section_info $section = null): array {
 
         // Get all quizzes for course.
         $quizzes = $this->get_all_quizzes($course->id);
@@ -64,7 +59,7 @@ class frontend extends \core_availability\frontend {
      * @param int $courseid Course id
      * @return array Array objects with fields id and name (which has been formatted with format_string.
      */
-    protected function get_all_quizzes($courseid) {
+    protected function get_all_quizzes(int $courseid): array {
         if ($courseid != $this->allquizzescourseid) {
             $this->allquizzes = [];
             $modinfo = get_fast_modinfo($courseid);
@@ -80,7 +75,7 @@ class frontend extends \core_availability\frontend {
     }
 
     protected function allow_add($course, \cm_info $cm = null,
-            \section_info $section = null) {
+            \section_info $section = null): bool {
 
         // Only show this option if there are some quizzes in the course.
         return !empty($this->get_all_quizzes($course->id));

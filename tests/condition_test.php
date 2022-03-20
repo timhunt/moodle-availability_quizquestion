@@ -14,19 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace availability_quizquestion;
+
 /**
- * Restriction by single quiz question unit tests for the condition class.
+ * Unit tests for the condition class.
  *
  * @package availability_quizquestion
  * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace availability_quizquestion;
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * Unit tests for the condition class.
  */
 class condition_testcase extends \advanced_testcase {
     /**

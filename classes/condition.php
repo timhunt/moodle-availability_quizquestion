@@ -14,16 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Restriction by single quiz question condition main class.
- *
- * @package availability_quizquestion
- * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace availability_quizquestion;
-use core\plugininfo\availability;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -31,6 +22,10 @@ require_once($CFG->libdir . '/questionlib.php');
 
 /**
  * Restriction by single quiz question condition main class.
+ *
+ * @package availability_quizquestion
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class condition extends \core_availability\condition {
     /** @var array these are the types of state we recognise. */
@@ -77,7 +72,7 @@ class condition extends \core_availability\condition {
 
     }
 
-    public function save() {
+    public function save(): \stdClass {
         return self::get_json($this->quizid, $this->questionid, $this->requiredstate);
     }
 
@@ -91,11 +86,11 @@ class condition extends \core_availability\condition {
         ];
     }
 
-    protected function get_debug_string() {
-        return " quiz:#{$this->quizid}, question:#{$this->questionid}, {$this->requiredstate}";
+    protected function get_debug_string(): string {
+        return " quiz:#$this->quizid, question:#$this->questionid, $this->requiredstate";
     }
 
-    public function is_available($not, \core_availability\info $info, $grabthelot, $userid) {
+    public function is_available($not, \core_availability\info $info, $grabthelot, $userid): bool {
 
         $allow = $this->requirements_fulfilled($userid);
 
@@ -112,7 +107,7 @@ class condition extends \core_availability\condition {
      * @param int $userid id of the user we are checking for.
      * @return bool true if the question is in the expected state. Else false.
      */
-    protected function requirements_fulfilled($userid) {
+    protected function requirements_fulfilled(int $userid): bool {
 
         $attempts = quiz_get_user_attempts($this->quizid, $userid, 'finished', true);
 
@@ -138,8 +133,8 @@ class condition extends \core_availability\condition {
     public function get_description($full, $not, \core_availability\info $info) {
         global $DB;
 
-        $quiz = $DB->get_record('quiz', array('id' => $this->quizid), '*');
-        $question = $DB->get_record('question', array('id' => $this->questionid), '*');
+        $quiz = $DB->get_record('quiz', array('id' => $this->quizid));
+        $question = $DB->get_record('question', array('id' => $this->questionid));
 
         if ($quiz && $question) {
             $a = [
@@ -147,7 +142,7 @@ class condition extends \core_availability\condition {
                 'quizname' => format_string($quiz->name),
                 'questiontext' => shorten_text(\question_utils::to_plain_text($question->questiontext,
                         $question->questiontextformat,
-                        ['noclean' => true, 'para' => false, 'filter' => false]), 30),
+                        ['noclean' => true, 'para' => false, 'filter' => false])),
                 'requiredstate' => $this->requiredstate->default_string(true),
             ];
             if ($not) {

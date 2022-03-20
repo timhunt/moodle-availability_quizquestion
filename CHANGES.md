@@ -1,5 +1,9 @@
 # Change log for the estriction by single quiz question availability condition
 
+## Changes in 1.3
+
+* This version is compativle with Moodle 3.11 and 4.0.
+
 ## Changes in 1.2
 
 * Correct a silly mistake with the version number.

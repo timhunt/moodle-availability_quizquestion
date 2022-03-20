@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Tests for the code that gets a list of questions in a quiz.
- *
- * @package availability_quizquestion
- * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace availability_quizquestion;
 defined('MOODLE_INTERNAL') || die();
 
@@ -31,6 +23,10 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 
 /**
  * Tests for the code that gets a list of questions in a quiz.
+ *
+ * @package availability_quizquestion
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_list_fetcher_testcase extends \advanced_testcase {
 

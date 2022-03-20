@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Restriction by single quiz question unit tests for backup and restore support.
- *
- * @package availability_quizquestion
- * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace availability_quizquestion;
 defined('MOODLE_INTERNAL') || die();
 
@@ -33,7 +25,11 @@ use backup;
 use core_availability\info_module;
 
 /**
- * Restriction by single quiz question unit tests for backup and restore support.
+ * Unit tests for backup and restore support.
+ *
+ * @package availability_quizquestion
+ * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_testcase extends \advanced_testcase {
 
@@ -150,7 +146,7 @@ class backup_testcase extends \advanced_testcase {
         global $DB;
 
         $restriction = \core_availability\tree::get_root_json(
-                [\availability_quizquestion\condition::get_json(
+                [condition::get_json(
                         $quiz->id, $question->id, \question_state::$gradedwrong)]);
         $DB->set_field('course_modules', 'availability',
                 json_encode($restriction), ['id' => $cmid]);
@@ -229,7 +225,7 @@ class backup_testcase extends \advanced_testcase {
      * @param string $backupid The unique identifier of the backup.
      * @return int The new course id.
      */
-    protected function restore_course($backupid) {
+    protected function restore_course(string $backupid): int {
         global $CFG, $DB, $USER;
 
         // Turn off file logging, otherwise it can't delete the file (Windows).
