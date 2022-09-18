@@ -27,8 +27,9 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
  * @package availability_quizquestion
  * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \availability_quizquestion\question_list_fetcher
  */
-class question_list_fetcher_testcase extends \advanced_testcase {
+class question_list_fetcher_test extends \advanced_testcase {
 
     public function test_list_questions_in_quiz() {
         $this->resetAfterTest();

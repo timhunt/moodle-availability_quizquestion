@@ -30,8 +30,9 @@ use core_availability\info_module;
  * @package availability_quizquestion
  * @copyright 2020 Tim Hunt, Shamim Rezaie, Benjamin Schröder, Martin Hanusch, Thomas Lattner, Alex Keiller
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \availability_quizquestion\condition::update_after_restore
  */
-class backup_testcase extends \advanced_testcase {
+class backup_test extends \advanced_testcase {
 
     protected function setUp(): void {
         global $CFG;

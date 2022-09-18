@@ -1,3 +1,4 @@
+// eslint-disable-next-line camelcase
 M.availability_quizquestion = M.availability_quizquestion || {};
 
 M.availability_quizquestion.form = Y.Object(M.core_availability.plugin);
@@ -8,6 +9,7 @@ M.availability_quizquestion.form = Y.Object(M.core_availability.plugin);
  * @property quizzes
  * @type Array
  */
+
 M.availability_quizquestion.form.quizzes = null;
 
 /**

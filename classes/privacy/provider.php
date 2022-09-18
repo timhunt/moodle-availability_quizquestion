@@ -24,8 +24,6 @@
 
 namespace availability_quizquestion\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Restriction by single quiz question privacy subsystem implementation.
  */
