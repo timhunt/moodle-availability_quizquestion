@@ -55,7 +55,7 @@ Feature: Restriction by single quiz question
 
     # Now attempt the quiz.
     And I follow "Diagnostic quiz"
-    And I press "Attempt quiz now"
+    And I press "Attempt quiz"
     And I click on "False" "radio" in the "I am good at reading?" "question"
     And I click on "False" "radio" in the "I am good at writing?" "question"
     And I follow "Finish attempt ..."

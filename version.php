@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2022032000;
-$plugin->requires = 2018051700;
+$plugin->version = 2022092000;
+$plugin->requires = 2022041900;
 $plugin->component = 'availability_quizquestion';
-$plugin->release = 'v1.3 for Moodle 3.9+';
+$plugin->release = 'v1.3 for Moodle 4.0+';
 $plugin->maturity = MATURITY_STABLE;

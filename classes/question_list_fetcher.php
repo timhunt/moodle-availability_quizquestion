@@ -16,10 +16,13 @@
 
 namespace availability_quizquestion;
 
+use mod_quiz\question\bank\qbank_helper;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
+require_once($CFG->libdir . '/questionlib.php');
 
 /**
  * Helper class to get the list of question options to show on the settings form.
@@ -37,31 +40,26 @@ class question_list_fetcher {
      * and random questions (for now).
      *
      * @param int $quizid quiz id.
-     * @return object[] array of objects with fields id and name.
+     * @return object[] array of objects with fields id (questionbankentryid) and name.
      */
-    public static function list_questions_in_quiz(int $quizid): array {
-        global $DB;
+    public static function list_questions_in_quiz(int $quizid, \context_module $context): array {
 
-        $questions = $DB->get_records_sql("
-                SELECT q.id, q.name, q.qtype, q.length
-                  FROM {question} q
-                  JOIN {quiz_slots} slot ON slot.questionid = q.id
-                 WHERE slot.quizid = ?
-              ORDER BY slot.slot
-                ", [$quizid]);
+        $slotinfo = qbank_helper::get_question_structure($quizid, $context);
 
         $choices = [];
         $questionnumber = 0;
-        foreach ($questions as $question) {
-            if ($question->length == 0) {
+        foreach ($slotinfo as $slot) {
+            if ($slot->length == 0) {
+                // Not real question (e.g. description).
                 continue;
             }
             $questionnumber += 1;
-            if ($question->qtype == 'random') {
+            if ($slot->qtype == 'random') {
                 continue;
             }
-            $a = (object) ['number' => $questionnumber, 'name' => format_string($question->name)];
-            $choices[] = (object) ['id' => (int) $question->id,
+
+            $a = (object) ['number' => $questionnumber, 'name' => format_string($slot->name)];
+            $choices[] = (object) ['id' => (int) $slot->questionbankentryid,
                     'name' => get_string('questionnumberandname', 'availability_quizquestion', $a)];
         }
 

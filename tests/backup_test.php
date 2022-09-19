@@ -23,6 +23,7 @@ require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 
 use backup;
 use core_availability\info_module;
+use core_question\local\bank\question_version_status;
 
 /**
  * Unit tests for backup and restore support.
@@ -81,7 +82,7 @@ class backup_test extends \advanced_testcase {
 
         // Verify the condition on the duplicated page.
         $this->assertEquals('&(+{quizquestion: quiz:#' . $quiz->id .
-                ', question:#' . $question->id . ', gradedwrong})',
+                ', questionbankentry:#' . $question->questionbankentryid . ', gradedwrong})',
                 (string) (new info_module($newpagecm))->get_availability_tree());
 
     }
@@ -110,6 +111,49 @@ class backup_test extends \advanced_testcase {
         $this->assert_page_depends_on_quiz_in_course($newcourseid);
     }
 
+    public function test_restore_311_backup() {
+        global $DB, $USER;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $backupid = 'abc';
+        $backuppath = make_backup_temp_directory($backupid);
+        get_file_packer('application/vnd.moodle.backup')->extract_to_pathname(
+            __DIR__ . "/fixtures/backup-from-moodle-311.mbz", $backuppath);
+
+        // Do the restore to new course with default settings.
+        $categoryid = $DB->get_field_sql("SELECT MIN(id) FROM {course_categories}");
+        $newcourseid = \restore_dbops::create_new_course('Test fullname', 'Test shortname', $categoryid);
+        $rc = new \restore_controller($backupid, $newcourseid, \backup::INTERACTIVE_NO, \backup::MODE_GENERAL, $USER->id,
+            \backup::TARGET_NEW_COURSE);
+
+        $this->assertTrue($rc->execute_precheck());
+        $rc->execute_plan();
+        $rc->destroy();
+
+        // Verify the condition on the restored page.
+        $newcourseid = $DB->get_field('course', 'MAX(id)', [], MUST_EXIST);
+        $newpagecm = $this->find_activity($newcourseid, 'page');
+        $newquizcm = $this->find_activity($newcourseid, 'quiz');
+        $questioncategory = $DB->get_record('question_categories',
+                ['contextid' => \context_course::instance($newcourseid)->id, 'name' => 'Test questions']);
+        $newquestion = $DB->get_record_sql("
+                SELECT q.*, qv.questionbankentryid
+                  FROM {question_bank_entries} qbe
+                  JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
+                            AND qv.version = (
+                                SELECT MAX(v.version)
+                                  FROM {question_versions} v
+                                 WHERE v.questionbankentryid = qbe.id
+                                   AND v.status <> ?)
+                  JOIN {question} q ON q.id = qv.questionid
+                 WHERE qbe.questioncategoryid = ? AND q.name = ?
+                ", [question_version_status::QUESTION_STATUS_DRAFT, $questioncategory->id, 'Reading'], IGNORE_MISSING);
+        $this->assertEquals('&(-{quizquestion: quiz:#' . $newquizcm->instance .
+                ', questionbankentry:#' . $newquestion->questionbankentryid . ', gradedwrong})',
+                (string) (new info_module($newpagecm))->get_availability_tree());
+    }
+
     /**
      * In the given course, create a quiz with one question.
      *
@@ -129,6 +173,7 @@ class backup_test extends \advanced_testcase {
                 ['contextid' => $context->id, 'name' => 'Test questions']);
         $question = $questiongenerator->create_question('multichoice', null,
                 ['category' => $category->id]);
+        $question = \question_bank::load_question_data($question->id); // Reload to get questionbankentryid.
         quiz_add_quiz_question($question->id, $quiz);
 
         return [$quiz, $question];
@@ -148,7 +193,7 @@ class backup_test extends \advanced_testcase {
 
         $restriction = \core_availability\tree::get_root_json(
                 [condition::get_json(
-                        $quiz->id, $question->id, \question_state::$gradedwrong)]);
+                        $quiz->id, $question->questionbankentryid, \question_state::$gradedwrong)]);
         $DB->set_field('course_modules', 'availability',
                 json_encode($restriction), ['id' => $cmid]);
         rebuild_course_cache($course->id, true);
@@ -164,7 +209,7 @@ class backup_test extends \advanced_testcase {
         $newquizcm = $this->find_activity($courseid, 'quiz');
         $newquestion = $this->find_test_question_from_course($courseid);
         $this->assertEquals('&(+{quizquestion: quiz:#' . $newquizcm->instance .
-                ', question:#' . $newquestion->id . ', gradedwrong})',
+                ', questionbankentry:#' . $newquestion->questionbankentryid . ', gradedwrong})',
                 (string) (new info_module($newpagecm))->get_availability_tree());
     }
 
@@ -192,8 +237,18 @@ class backup_test extends \advanced_testcase {
         $coursecontext = \context_course::instance($courseid);
         $questioncategory = $DB->get_record('question_categories',
                 ['contextid' => $coursecontext->id, 'name' => 'Test questions']);
-        return $DB->get_record('question',
-                ['category' => $questioncategory->id]);
+        return $DB->get_record_sql("
+                SELECT q.*, qv.questionbankentryid
+                  FROM {question_bank_entries} qbe
+                  JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
+                            AND qv.version = (
+                                SELECT MAX(v.version)
+                                  FROM {question_versions} v
+                                 WHERE v.questionbankentryid = qbe.id
+                                   AND v.status <> ?)
+                  JOIN {question} q ON q.id = qv.questionid
+                 WHERE qbe.questioncategoryid = ?
+                ", [question_version_status::QUESTION_STATUS_DRAFT, $questioncategory->id], IGNORE_MISSING);
     }
 
     /**

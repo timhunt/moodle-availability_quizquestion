@@ -47,7 +47,7 @@ M.availability_quizquestion.form.getNode = function(json) {
     html += '</select></label>';
 
     html += ' <label><span class="sr-only">' + M.util.get_string('label_question', 'availability_quizquestion') + '</span>' +
-            '<select name="questionid" class="custom-select">' +
+            '<select name="questionbankentryid" class="custom-select">' +
             '<option value="">' + M.util.get_string('choosedots', 'moodle') + '</option>';
     html += '</select></label>';
 
@@ -118,10 +118,10 @@ M.availability_quizquestion.form.getNode = function(json) {
     if (json.quizid !== undefined &&
             node.one('select[name=quizid] > option[value=' + json.quizid + ']')) {
         node.one('select[name=quizid]').set('value', '' + json.quizid);
-        updateQuestions(node.one('select[name=quizid]'), node.one('select[name=questionid]'), function() {
-            if (json.questionid !== undefined &&
-                node.one('select[name=questionid] > option[value=' + json.questionid + ']')) {
-                node.one('select[name=questionid]').set('value', '' + json.questionid);
+        updateQuestions(node.one('select[name=quizid]'), node.one('select[name=questionbankentryid]'), function() {
+            if (json.questionbankentryid !== undefined &&
+                node.one('select[name=questionbankentryid] > option[value=' + json.questionbankentryid + ']')) {
+                node.one('select[name=questionbankentryid]').set('value', '' + json.questionbankentryid);
             }
         });
     }
@@ -140,7 +140,7 @@ M.availability_quizquestion.form.getNode = function(json) {
         root.delegate('change', function() {
             var ancestorNode = this.ancestor('span.availability_quizquestion');
             var quizNode = ancestorNode.one('select[name=quizid]');
-            var questionNode = ancestorNode.one('select[name=questionid]');
+            var questionNode = ancestorNode.one('select[name=questionbankentryid]');
             updateQuestions(quizNode, questionNode);
         }, '.availability_quizquestion select[name=quizid]');
     }
@@ -150,11 +150,11 @@ M.availability_quizquestion.form.getNode = function(json) {
 
 M.availability_quizquestion.form.fillValue = function(value, node) {
     var quizid = node.one('select[name=quizid]').get('value');
-    var questionid = node.one('select[name=questionid]').get('value');
+    var questionbankentryid = node.one('select[name=questionbankentryid]').get('value');
     var state = node.one('select[name=requiredstate]').get('value');
 
     value.quizid = quizid === '' ? '' : parseInt(quizid, 10);
-    value.questionid = questionid === '' ? '' : parseInt(questionid, 10);
+    value.questionbankentryid = questionbankentryid === '' ? '' : parseInt(questionbankentryid, 10);
     value.requiredstate = state;
 };
 
@@ -165,7 +165,7 @@ M.availability_quizquestion.form.fillErrors = function(errors, node) {
     if (value.quizid === '') {
         errors.push('availability_quizquestion:error_selectquiz');
     }
-    if (value.questionid === '') {
+    if (value.questionbankentryid === '') {
         errors.push('availability_quizquestion:error_selectquestion');
     }
     if (value.requiredstate === '') {

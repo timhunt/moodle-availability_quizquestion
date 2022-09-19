@@ -30,12 +30,12 @@ require(__DIR__ . '/../../../config.php');
 $quizid = required_param('quizid', PARAM_INT);
 
 // Check login and permissions.
-$quiz = $DB->get_record('quiz', array('id' => $quizid), '*', MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $quiz->course));
+$quiz = $DB->get_record('quiz', ['id' => $quizid], '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $quiz->course]);
 $cm = get_coursemodule_from_instance("quiz", $quiz->id, $course->id);
 
 require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/quiz:viewreports', $context);
 
-echo json_encode(question_list_fetcher::list_questions_in_quiz($quizid));
+echo json_encode(question_list_fetcher::list_questions_in_quiz($quizid, $context));
