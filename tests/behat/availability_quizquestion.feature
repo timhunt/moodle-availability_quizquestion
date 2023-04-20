@@ -32,7 +32,8 @@ Feature: Restriction by single quiz question
       | Writing  | 1    | 1       |
 
   @javascript
-  Scenario: Test basic use
+  Scenario: Test basic use Moodle ≥ 4.1
+    Given the site is running Moodle version 4.1 or higher
     # Set up as teacher.
     Given I am on the "C1" "Course" page logged in as "teacher"
     And I turn editing mode on
@@ -45,7 +46,41 @@ Feature: Restriction by single quiz question
     And I set the field "Quiz question" to "Diagnostic quiz"
     And I set the field "Which question in the selected quiz" to "Q1) Reading"
     And I set the field "Required state" to "Incorrect"
-    And I click on "Displayed greyed-out if user does not meet this condition" "link"
+    And I click on "Displayed if student doesn't meet this condition • Click to hide" "link"
+    And I click on "Save and return to course" "button"
+
+    # Try it as student - no access yet.
+    And I log out
+    And I am on the "C1" "Course" page logged in as "student"
+    Then I should not see "Help with reading"
+
+    # Now attempt the quiz.
+    And I follow "Diagnostic quiz"
+    And I press "Attempt quiz"
+    And I click on "False" "radio" in the "I am good at reading?" "question"
+    And I click on "False" "radio" in the "I am good at writing?" "question"
+    And I follow "Finish attempt ..."
+    And I press "Submit all and finish"
+    And I click on "Submit all and finish" "button" in the "Submit all your answers and finish?" "dialogue"
+    And I am on the "C1" "Course" page
+    And I follow "Help with reading"
+    And I should see "Open your eyes!"
+
+  Scenario: Test basic use Moodle ≤ 4.0
+    Given the site is running Moodle version 4.0 or lower
+    # Set up as teacher.
+    Given I am on the "C1" "Course" page logged in as "teacher"
+    And I turn editing mode on
+    When I add a "Page" to section "1"
+    And I set the following fields to these values:
+      | Name         | Help with reading |
+      | Page content | Open your eyes!   |
+    And I click on "Add restriction..." "button"
+    And I click on "Quiz question" "button" in the "Add restriction..." "dialogue"
+    And I set the field "Quiz question" to "Diagnostic quiz"
+    And I set the field "Which question in the selected quiz" to "Q1) Reading"
+    And I set the field "Required state" to "Incorrect"
+    And I click on "Displayed if student doesn't meet this condition • Click to hide" "link"
     And I click on "Save and return to course" "button"
 
     # Try it as student - no access yet.

@@ -122,7 +122,12 @@ class condition_test extends \advanced_testcase {
                 ['category' => $category->id]);
         $question = \question_bank::load_question_data($question->id); // Reload to get questionbankentryid.
         quiz_add_quiz_question($question->id, $quiz);
-        quiz_update_sumgrades($quiz);
+        if (class_exists('\\mod_quiz\\grade_calculator')) {
+            $quizobj = \mod_quiz\quiz_settings::create($quiz->id, $user->id);
+            $quizobj->get_grade_calculator()->recompute_quiz_sumgrades();
+        } else {
+            quiz_update_sumgrades($quiz);
+        }
 
         // Do test (user has not attempted the quiz yet).
         $cond = new condition((object) [
@@ -143,13 +148,21 @@ class condition_test extends \advanced_testcase {
 
         // User attempts the quiz and get the question right.
         $timenow = time();
-        $quizobj = \quiz::create($quiz->id, $user->id);
+        if (class_exists('\\mod_quiz\\quiz_settings')) {
+            $quizobj = \mod_quiz\quiz_settings::create($quiz->id, $user->id);
+        } else {
+            $quizobj = \quiz::create($quiz->id, $user->id);
+        }
         $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
         $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
         $attempt = quiz_create_attempt($quizobj, 1, null, $timenow, false, $user->id);
         quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
         quiz_attempt_save_started($quizobj, $quba, $attempt);
-        $attemptobj = \quiz_attempt::create($attempt->id);
+        if (class_exists('\\mod_quiz\\quiz_attempt')) {
+            $attemptobj = \mod_quiz\quiz_attempt::create($attempt->id);
+        } else {
+            $attemptobj = \quiz_attempt::create($attempt->id);
+        }
         $tosubmit = [1 => ['answer' => '3.14']];
         $attemptobj->process_submitted_actions(time(), false, $tosubmit);
         $attemptobj->process_finish(time(), false);
@@ -163,13 +176,21 @@ class condition_test extends \advanced_testcase {
 
         // User attempts the quiz and get the question wrong.
         $timenow = time();
-        $quizobj = \quiz::create($quiz->id, $user->id);
+        if (class_exists('\\mod_quiz\\quiz_settings')) {
+            $quizobj = \mod_quiz\quiz_settings::create($quiz->id, $user->id);
+        } else {
+            $quizobj = \quiz::create($quiz->id, $user->id);
+        }
         $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
         $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
         $attempt = quiz_create_attempt($quizobj, 2, null, $timenow, false, $user->id);
         quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
         quiz_attempt_save_started($quizobj, $quba, $attempt);
-        $attemptobj = \quiz_attempt::create($attempt->id);
+        if (class_exists('\\mod_quiz\\quiz_attempt')) {
+            $attemptobj = \mod_quiz\quiz_attempt::create($attempt->id);
+        } else {
+            $attemptobj = \quiz_attempt::create($attempt->id);
+        }
         $tosubmit = [1 => ['answer' => '42']];
         $attemptobj->process_submitted_actions(time(), false, $tosubmit);
         $attemptobj->process_finish(time(), false);
@@ -205,7 +226,12 @@ class condition_test extends \advanced_testcase {
                 ['category' => $category->id]);
         $question = \question_bank::load_question_data($question->id); // Reload to get questionbankentryid.
         quiz_add_quiz_question($question->id, $quiz);
-        quiz_update_sumgrades($quiz);
+        if (class_exists('\\mod_quiz\\grade_calculator')) {
+            $quizobj = \mod_quiz\quiz_settings::create($quiz->id, $user->id);
+            $quizobj->get_grade_calculator()->recompute_quiz_sumgrades();
+        } else {
+            quiz_update_sumgrades($quiz);
+        }
 
         // Do test (user has not attempted the quiz yet).
         $legacycond = new condition((object) [
@@ -226,13 +252,21 @@ class condition_test extends \advanced_testcase {
 
         // User attempts the quiz and get the question right.
         $timenow = time();
-        $quizobj = \quiz::create($quiz->id, $user->id);
+        if (class_exists('\\mod_quiz\\quiz_settings')) {
+            $quizobj = \mod_quiz\quiz_settings::create($quiz->id, $user->id);
+        } else {
+            $quizobj = \quiz::create($quiz->id, $user->id);
+        }
         $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
         $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
         $attempt = quiz_create_attempt($quizobj, 1, null, $timenow, false, $user->id);
         quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
         quiz_attempt_save_started($quizobj, $quba, $attempt);
-        $attemptobj = \quiz_attempt::create($attempt->id);
+        if (class_exists('\\mod_quiz\\quiz_attempt')) {
+            $attemptobj = \mod_quiz\quiz_attempt::create($attempt->id);
+        } else {
+            $attemptobj = \quiz_attempt::create($attempt->id);
+        }
         $tosubmit = [1 => ['answer' => '3.14']];
         $attemptobj->process_submitted_actions(time(), false, $tosubmit);
         $attemptobj->process_finish(time(), false);
@@ -246,13 +280,21 @@ class condition_test extends \advanced_testcase {
 
         // User attempts the quiz and get the question wrong.
         $timenow = time();
-        $quizobj = \quiz::create($quiz->id, $user->id);
+        if (class_exists('\\mod_quiz\\quiz_settings')) {
+            $quizobj = \mod_quiz\quiz_settings::create($quiz->id, $user->id);
+        } else {
+            $quizobj = \quiz::create($quiz->id, $user->id);
+        }
         $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
         $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
         $attempt = quiz_create_attempt($quizobj, 2, null, $timenow, false, $user->id);
         quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
         quiz_attempt_save_started($quizobj, $quba, $attempt);
-        $attemptobj = \quiz_attempt::create($attempt->id);
+        if (class_exists('\\mod_quiz\\quiz_attempt')) {
+            $attemptobj = \mod_quiz\quiz_attempt::create($attempt->id);
+        } else {
+            $attemptobj = \quiz_attempt::create($attempt->id);
+        }
         $tosubmit = [1 => ['answer' => '42']];
         $attemptobj->process_submitted_actions(time(), false, $tosubmit);
         $attemptobj->process_finish(time(), false);
