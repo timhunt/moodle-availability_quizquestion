@@ -147,7 +147,11 @@ class condition extends \core_availability\condition {
 
         if (count($attempts) > 0) {
 
-            $attemptobj = \quiz_attempt::create(end($attempts)->id);
+            if (class_exists('\\mod_quiz\\quiz_attempt')) {
+                $attemptobj = \mod_quiz\quiz_attempt::create(end($attempts)->id);
+            } else {
+                $attemptobj = \quiz_attempt::create(end($attempts)->id);
+            }
 
             foreach ($attemptobj->get_slots() as $slot) {
                 $qa = $attemptobj->get_question_attempt($slot);

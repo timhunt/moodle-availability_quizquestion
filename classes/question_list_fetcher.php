@@ -21,8 +21,10 @@ use mod_quiz\question\bank\qbank_helper;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
 require_once($CFG->libdir . '/questionlib.php');
+if ($CFG->release < 4.2) {
+    require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
+}
 
 /**
  * Helper class to get the list of question options to show on the settings form.
