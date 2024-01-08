@@ -16,6 +16,10 @@
 
 namespace availability_quizquestion;
 
+use mod_quiz\quiz_settings;
+use mod_quiz\structure;
+use qbank_managecategories\category_condition;
+
 /**
  * Tests for the code that gets a list of questions in a quiz.
  *
@@ -24,10 +28,13 @@ namespace availability_quizquestion;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \availability_quizquestion\question_list_fetcher
  */
+
 class question_list_fetcher_test extends \advanced_testcase {
 
     public function test_list_questions_in_quiz() {
-        global $DB;
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot . '/question/editlib.php');
 
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -56,7 +63,31 @@ class question_list_fetcher_test extends \advanced_testcase {
         quiz_add_quiz_question($tf->id, $quiz);
 
         // Add a random question (does not matter that there are not enough questions in the bank).
-        quiz_add_random_questions($quiz, 0, $category->id, 1, false);
+        if (class_exists('\mod_quiz\structure') && class_exists('\qbank_tagquestion\tag_condition')) {
+            $filter = [
+                'category' => [
+                    'jointype' => 1,
+                    'values' => [$category->id],
+                    'filteroptions' => ['includesubcategories' => false],
+                ],
+            ];
+            // Generate default filter condition for the random question to be added in the new category.
+            $filtercondition = [
+                'qpage' => 0,
+                'cat' => "{$category->id},{$coursecontext->id}",
+                'qperpage' => DEFAULT_QUESTIONS_PER_PAGE,
+                'tabname' => 'questions',
+                'sortdata' => [],
+                'filter' => $filter,
+            ];
+            // Add random question to the quiz.
+            [$quiz, ] = get_module_from_cmid($quiz->cmid);
+            $settings = quiz_settings::create_for_cmid($quiz->cmid);
+            $structure = structure::create_for_quiz($settings);
+            $structure->add_random_questions(0, 1, $filtercondition);
+        } else {
+            quiz_add_random_questions($quiz, 0, $category->id, 1, false);
+        }
 
         // Add an essay question.
         $essay = $questiongenerator->create_question('essay', null,
