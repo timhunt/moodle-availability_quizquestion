@@ -1,5 +1,11 @@
 # Restriction by single quiz question #
 
+[![Build Status](https://github.com/timhunt/moodle-availability_quizquestion/workflows/Moodle%20plugin%20CI/badge.svg?branch=main)](https://github.com/timhunt/moodle-availability_quizquestion/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
+[![PHP Support](https://img.shields.io/badge/php-7.3--8.2-blue)](https://github.com/timhunt/moodle-availability_quizquestion/actions)
+[![Moodle Support](https://img.shields.io/badge/Moodle-4.0--4.3-orange)](https://github.com/timhunt/moodle-availability_quizquestion/actions)
+[![License GPL-3.0](https://img.shields.io/github/license/timhunt/moodle-availability_quizquestion?color=lightgrey)](https://github.com/timhunt/moodle-availability_quizquestion/blob/main/LICENSE)
+[![GitHub contributors](https://img.shields.io/github/contributors/timhunt/moodle-availability_quizquestion)](https://github.com/timhunt/moodle-availability_quizquestion/graphs/contributors)
+
 This is a Moodle conditional availability rule, which makes it possible
 to show or hide another resource, based on the state of one particular question
 in one quiz. So, if you want show a particular help document to students
@@ -11,8 +17,7 @@ to extend it in the future.
 
 ## To install ##
 
-Once this is published, you will be able to install it from
-https://moodle.org/plugins/availability_quizquestion.
+Install this plugin from https://moodle.org/plugins/availability_quizquestion.
 
 Alternatively you can install using git. Run these commands in the root of your
 Moodle site:
